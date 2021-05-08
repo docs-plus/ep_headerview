@@ -1,0 +1,13 @@
+{
+  "parts": [
+    {
+      "name": "ep_headerview",
+      "client_hooks": {
+        "postAceInit": "ep_headerview/static/js/index"
+      },
+      "hooks": {
+        "eejsBlock_editbarMenuRight": "ep_headerview/index"
+      }
+    }
+  ]
+}
