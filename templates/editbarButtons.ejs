@@ -1,0 +1,105 @@
+<li class="separator acl-write"></li>
+<style>
+
+    #headerView {
+        margin-right: 50px;
+        width: 180px;
+    }
+
+    #heading-view-list{
+        width: 180px;
+        height: 30px;
+        background: #fff;
+        position: absolute;
+        box-shadow: 1px 1px 1px rgba(0, 0, 0, .2);
+        top: 40px;
+    }
+    #heading-view-list ul{
+        display: block;
+        overflow: auto;
+        height: 180px;
+    }
+    #heading-view-list ul li{
+        float: left;
+        width: 100%;
+        margin: 2px 0;
+        padding: 6px;
+        transition: all .2s linear;
+    }
+    #heading-view-list ul li:hover{
+        background-color: #eee;
+        cursor: pointer;
+    }
+
+    .toolbar ul, .toolbar{overflow: visible;}
+
+    .headingInputs{
+        position: relative;
+    }
+
+    .headingInputs .btn-clearInput {
+        width: 30px;
+        background: #ddd;
+        position: absolute;
+        right: -10px;
+        top: 0;
+        border-left: 2px solid #ccc;
+        height: 33px;
+        text-align: center;
+        line-height: 34px;
+        font-weight: bold;
+        font-family: cursive;
+        border-radius: 0 3px 3px 0;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.74, -0.05, 0.27, 1.75);
+        opacity: 0;
+        padding:0;
+    }
+    .headingInputs .btn-clearInput.active{
+        right: 0;
+        opacity: 1;
+    }
+    .headingInputs .btn-clearInput:hover{
+        background-color: #ccc;
+    }
+
+    #heading-result-msg{
+        position: absolute;
+        background: #f8f9fa;
+        width: 100%;
+        padding: 3px 6px;
+        color: #2a2a2a;
+        font-size: 12px;
+        box-shadow: 0px 1px 4px 0px rgb(0 0 0 / 8%);
+        border-radius: 0px 0px 3px 3px;
+        z-index: -1;
+        top: 0;
+        border-top: 1px solid #ccc;
+        visibility: hidden;
+        transition: all 0.3s cubic-bezier(0.74, -0.05, 0.27, 1.75);
+    }
+    #heading-result-msg.active{
+        top: 33px;
+        visibility: visible;
+    }
+
+    #heading-view{
+        padding-right: 30px;
+    }
+    
+
+</style>
+<li id="headerView" class="acl-write">
+    <div class="headingInputs">
+        <input type="text" name="filter-view" autocomplete="off" id="heading-view" placeholder="filter...">
+        <button class="btn-clearInput">X</button>
+        <div id="heading-result-msg"><p>Search through the headers</p></div>
+        
+    </div>
+    
+    <!-- <div id="heading-view-list">
+        <div id="searchResults"></div>
+        <ul>
+        </ul>
+    </div> -->
+</li>
