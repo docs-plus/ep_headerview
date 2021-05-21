@@ -16,6 +16,27 @@ exports.postAceInit = (hookName, context) => {
   const clearCssFilter = () => $body_ace_outer()
       .find('iframe').contents().find('head #customHeader').html('');
 
+  const evaluateSearchResult = (value, callback) => {
+    const val = value;
+    const regEx = new RegExp(val, 'gi');
+    const results = headerContetnts.filter((x) => x.text.match(regEx));
+    console.log(value, callback, results);
+
+    let messge = 'Opps! No results found.';
+    if (results.length) {
+      const result = results.length === 1 ? 'result' : 'results';
+      messge = `About <b>${results.length}</b> ${result} found.`;
+    } else {
+      $("#heading-result-msg").addClass("active")
+    }
+
+    if (val.length <= 1) messge = 'Search through the headers';
+
+    $('#heading-result-msg').html(`<p>${messge}</p>`);
+    filterResult = results;
+    if (callback) callback(results);
+  };
+
   const appendCssFilter = () => {
     let css = '';
     let cssIsFilter = [];
@@ -23,7 +44,7 @@ exports.postAceInit = (hookName, context) => {
       cssIsFilter.push(`[wrapper="${val.wrapper}"]`);
     });
     cssIsFilter = cssIsFilter.join(',');
-    css = ` 
+    css = `
         div.ace-line:not(:is(${cssIsFilter})) *{
           visibility: hidden;
           height:0;
@@ -71,8 +92,7 @@ exports.postAceInit = (hookName, context) => {
     $body_ace_outer().find('iframe').contents().find('head #customHeader').html(css);
   };
 
-
-  const updateHeaderList = () => {
+  const updateHeaderList = (callback) => {
     const headers = $body_ace_outer().find('iframe').contents().find('div :header');
     headerContetnts = [];
     headers.each(function () {
@@ -81,30 +101,28 @@ exports.postAceInit = (hookName, context) => {
       const wrapper = $(this).parent().attr('wrapper');
       headerContetnts.push({text, headerId, wrapper});
     });
+    if (callback) callback(headerContetnts);
   };
 
-  const searchResult = _.debounce((el) => {
-    const val = $(el).val();
-    const regEx = new RegExp(val, 'gi');
-    const results = headerContetnts.filter((x) => x.text.match(regEx));
 
-    let messge = 'Opps! No results found.';
-    if (results.length) {
-      const result = results.length === 1 ? 'result' : 'results';
-      messge = `About <b>${results.length}</b> ${result} found.`;
-    }
+  if (clientVars.padId !== clientVars.padView) {
+    $('#headerView').show();
+    $('#heading-view').val(clientVars.padName);
 
-    if (val.length <= 1) messge = 'Search through the headers';
+    updateHeaderList((headerContetnts) => {
+      evaluateSearchResult($filterInput.val(), (result) => {
+        appendCssFilter();
+      });
+    });
+  }
 
-    $('#heading-result-msg').html(`<p>${messge}</p>`);
-    filterResult = results;
-  }, 300);
-
+  const searchResult = _.debounce(evaluateSearchResult, 300);
 
   $filterInput
       .focusin(function () {
         const inputText = $(this).val();
         $('#heading-result-msg').addClass('active');
+        searchResult(inputText);
         if (inputText) {
           $('.btn-clearInput').addClass('active');
         } else {
@@ -149,4 +167,5 @@ exports.postAceInit = (hookName, context) => {
     $('#heading-result-msg').html('<p>Search through the headers</p>');
     updateHeaderList();
   });
+
 };
