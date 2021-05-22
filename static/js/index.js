@@ -45,6 +45,10 @@ exports.postAceInit = (hookName, context) => {
     });
     cssIsFilter = cssIsFilter.join(',');
     css = `
+        div.ace-line{
+          position: relative;
+        }
+
         div.ace-line:not(:is(${cssIsFilter})) *{
           visibility: hidden;
           height:0;
