@@ -55,42 +55,59 @@ exports.postAceInit = (hookName, context) => {
           display:none!important;
         }
 
-        div.ace-line:not(:is(${cssIsFilter})):after{
-          content: "";
-          display: block;
-          width: 115%;
-          height: 25px;
-          background-color: #f8f9fa;
-          position: absolute;
-          left: 50%;
-          transform: translateX(-50%);
-          background: linear-gradient(-45deg, transparent 16px, #f8f9fa 0),
-          linear-gradient(45deg, transparent 16px, #f8f9fa 0);
-          background-repeat: repeat-x;
-          background-position: left bottom;
-          background-size: 22px 32px;
-          top: -35px
+        div.ace-line:is(${cssIsFilter}):after,
+        div.ace-line:is(${cssIsFilter}):before{
+          position: relative;
+          font-size: 1.5em;
+          height: 1em;
+          border: 0;
+          width: 150%;
         }
 
+        div.ace-line:not(:is(${cssIsFilter})):after,
+        div.ace-line:not(:is(${cssIsFilter})):before,
+        div.ace-line:not(:is(${cssIsFilter})):after,
         div.ace-line:not(:is(${cssIsFilter})):before{
           content: "";
           display: block;
-          width: 115%;
-          height: 25px;
-          background-color: #f8f9fa;
           position: absolute;
-          left: 50%;
-          transform: translateX(-50%);
-          background: linear-gradient(-45deg,#f8f9fa 16px,#f8f9fa 16px,#f8f9fa 16px,transparent 0),
-          linear-gradient(45deg, #f8f9fa 16px, transparent 0);
-          background-position: left top;
-          background-repeat: repeat-x;
-          background-size: 22px 32px;
-          top:-60px;
+          left: 0;
+          right: 0;
+          background-size: 2em 100%;
+          height: 16px;
         }
 
-        div.ace-line:is(${cssIsFilter})[node="first"]{ margin-top:20px; }
-        div.ace-line:is(${cssIsFilter})[node="last"]{ margin-bottom:20px; }
+        div.ace-line:not(:is(${cssIsFilter})):after,
+        div.ace-line:not(:is(${cssIsFilter})):after{
+          -webkit-filter: drop-shadow(hsla(0, 0%, 80%, 0.3) 1px 3px 5px);
+
+        }
+
+        div.ace-line:not(:is(${cssIsFilter})):after,
+        div.ace-line:not(:is(${cssIsFilter})):before{
+          transform: translateY(-20px);
+        }
+
+        div.ace-line:not(:is(${cssIsFilter})):after,
+        div.ace-line:not(:is(${cssIsFilter})):after{
+          background-image:
+          linear-gradient(135deg, hsla(210deg, 17%, 90%, 0.2) 30%, transparent 30%),
+          linear-gradient(225deg, hsla(210deg, 17%, 90%, 0.2) 30%, transparent 30%);
+          background-position: -webkit-calc(50% - 1em);
+          top: 0.5em;
+        }
+
+        div.ace-line:not(:is(${cssIsFilter})):before,
+        div.ace-line:not(:is(${cssIsFilter})):before{
+          background-image:
+          linear-gradient(315deg, hsla(210deg, 17%, 90%, 0.2) 30%, transparent 30%),
+          linear-gradient(45deg, hsla(210deg, 17%, 90%, 0.2) 30%, transparent 30%);
+          background-position: 50%;
+          top: -0.5em;
+        }
+
+        div.ace-line:not(:is(${cssIsFilter})){ margin-top:30px; }
+        div.ace-line:not(:is(${cssIsFilter})){ margin-bottom:30px; }
       `;
 
     $body_ace_outer().find('iframe').contents().find('head #customHeader').html(css);
