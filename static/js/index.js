@@ -75,11 +75,14 @@ exports.postAceInit = (hookName, context) => {
           right: 0;
           background-size: 2em 100%;
           height: 16px;
+          width: 122%;
+          left: 50%;
+          transform: translate(-50%,-30px)!important;
         }
 
         div.ace-line:not(:is(${cssIsFilter})):after,
         div.ace-line:not(:is(${cssIsFilter})):after{
-          -webkit-filter: drop-shadow(hsla(0, 0%, 80%, 0.3) 1px 3px 5px);
+          -webkit-filter: drop-shadow(hsla(0, 0%, 80%, 0.2) 0px 0px 10px);
 
         }
 
@@ -91,8 +94,8 @@ exports.postAceInit = (hookName, context) => {
         div.ace-line:not(:is(${cssIsFilter})):after,
         div.ace-line:not(:is(${cssIsFilter})):after{
           background-image:
-          linear-gradient(135deg, hsla(210deg, 17%, 90%, 0.2) 30%, transparent 30%),
-          linear-gradient(225deg, hsla(210deg, 17%, 90%, 0.2) 30%, transparent 30%);
+          linear-gradient(135deg, hsla(210deg 17% 98%) 30%, transparent 30%),
+          linear-gradient(225deg, hsla(210deg 17% 98%) 30%, transparent 30%);
           background-position: -webkit-calc(50% - 1em);
           top: 0.5em;
         }
@@ -100,8 +103,8 @@ exports.postAceInit = (hookName, context) => {
         div.ace-line:not(:is(${cssIsFilter})):before,
         div.ace-line:not(:is(${cssIsFilter})):before{
           background-image:
-          linear-gradient(315deg, hsla(210deg, 17%, 90%, 0.2) 30%, transparent 30%),
-          linear-gradient(45deg, hsla(210deg, 17%, 90%, 0.2) 30%, transparent 30%);
+          linear-gradient(315deg, hsla(210deg 17% 98%) 30%, transparent 30%),
+          linear-gradient(45deg, hsla(210deg 17% 98%) 30%, transparent 30%);
           background-position: 50%;
           top: -0.5em;
         }
