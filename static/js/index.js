@@ -10,38 +10,25 @@ exports.postAceInit = (hookName, context) => {
   let filterResult = [];
 
   // append custom style element to the pad inner.
-  $body_ace_outer().find('iframe')
-      .contents().find('head').append('<style id="customHeader"></style>');
+  $body_ace_outer()
+      .find('iframe')
+      .contents()
+      .find('head')
+      .append('<style id="customHeader"></style>');
 
-  const clearCssFilter = () => $body_ace_outer()
-      .find('iframe').contents().find('head #customHeader').html('');
-
-  const evaluateSearchResult = (value, callback) => {
-    const val = value;
-    const regEx = new RegExp(val, 'gi');
-    const results = headerContetnts.filter((x) => x.text.match(regEx));
-    console.log(value, callback, results);
-
-    let messge = 'Opps! No results found.';
-    if (results.length) {
-      const result = results.length === 1 ? 'result' : 'results';
-      messge = `About <b>${results.length}</b> ${result} found.`;
-    } else {
-      $("#heading-result-msg").addClass("active")
-    }
-
-    if (val.length <= 1) messge = 'Search through the headers';
-
-    $('#heading-result-msg').html(`<p>${messge}</p>`);
-    filterResult = results;
-    if (callback) callback(results);
-  };
+  const clearCssFilter = () => {
+    return  $body_ace_outer()
+      .find('iframe')
+      .contents()
+      .find('head #customHeader')
+      .html('');
+  }
 
   const appendCssFilter = () => {
     let css = '';
     let cssIsFilter = [];
     filterResult.forEach((val, index) => {
-      cssIsFilter.push(`[wrapper="${val.wrapper}"]`);
+      cssIsFilter.push(`[parentid="${val.sectionId}"]`);
     });
     cssIsFilter = cssIsFilter.join(',');
     css = `
@@ -61,7 +48,7 @@ exports.postAceInit = (hookName, context) => {
           font-size: 1.5em;
           height: 1em;
           border: 0;
-          width: 150%;
+          width: 114%;
         }
 
         div.ace-line:not(:is(${cssIsFilter})):after,
@@ -113,21 +100,63 @@ exports.postAceInit = (hookName, context) => {
         div.ace-line:not(:is(${cssIsFilter})){ margin-bottom:30px; }
       `;
 
-    $body_ace_outer().find('iframe').contents().find('head #customHeader').html(css);
+    $body_ace_outer()
+        .find('iframe')
+        .contents()
+        .find('head #customHeader')
+        .html(css);
+  };
+
+  const evaluateSearchResult = (value, callback) => {
+    const val = $(value).val();
+    if(!val) return;
+    const regEx = new RegExp(val, 'gi');
+    const results = headerContetnts.filter((x) => x.text.match(regEx));
+
+    let messge = 'Opps! No results found.';
+    if (results.length) {
+      const result = results.length === 1 ? 'result' : 'results';
+      messge = `About <b>${results.length}</b> ${result} found.`;
+    } else {
+      $('#heading-result-msg').addClass('active');
+    }
+
+    if (val.length <= 1) messge = 'Search through the headers';
+
+    $('#heading-result-msg').html(`<p>${messge}</p>`);
+    filterResult = results;
+    if (callback) callback(results);
   };
 
   const updateHeaderList = (callback) => {
-    const headers = $body_ace_outer().find('iframe').contents().find('div :header');
+    const headers = $body_ace_outer()
+        .find('iframe')
+        .contents()
+        .find('div :header');
+
     headerContetnts = [];
     headers.each(function () {
       const text = $(this).text();
-      const headerId = $(this).attr('data-id');
-      const wrapper = $(this).parent().attr('wrapper');
-      headerContetnts.push({text, headerId, wrapper});
+      const $parent = $(this).parent();
+
+      const wrapper = $parent.attr('wrapper');
+      const parentId = $parent.attr('parentid');
+      const sectionId = $parent.attr('sectionid');
+      const tag = $parent.attr('tag');
+
+      const result = {
+        text,
+        wrapper,
+        parentId,
+        sectionId,
+        tag
+      }
+
+      headerContetnts.push(result);
     });
+
     if (callback) callback(headerContetnts);
   };
-
 
   if (clientVars.padId !== clientVars.padView) {
     $('#headerView').show();
@@ -191,5 +220,4 @@ exports.postAceInit = (hookName, context) => {
     $('#heading-result-msg').html('<p>Search through the headers</p>');
     updateHeaderList();
   });
-
 };
