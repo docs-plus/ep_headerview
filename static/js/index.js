@@ -108,7 +108,7 @@ exports.postAceInit = (hookName, context) => {
   };
 
   const evaluateSearchResult = (value, callback) => {
-    const val = $(value).val();
+    const val = $(value).val() || value;
     if(!val) return;
     const regEx = new RegExp(val, 'gi');
     const results = headerContetnts.filter((x) => x.text.match(regEx));
