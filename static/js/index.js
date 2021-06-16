@@ -162,11 +162,14 @@ exports.postAceInit = (hookName, context) => {
     $('#headerView').show();
     $('#heading-view').val(clientVars.padName);
 
-    updateHeaderList((headerContetnts) => {
-      evaluateSearchResult($filterInput.val(), (result) => {
-        appendCssFilter();
+    setTimeout(() => {
+      updateHeaderList((headerContetnts) => {
+        evaluateSearchResult($filterInput.val(), (result) => {
+          appendCssFilter();
+        });
       });
-    });
+    }, 1000);
+
   }
 
   const searchResult = _.debounce(evaluateSearchResult, 300);
