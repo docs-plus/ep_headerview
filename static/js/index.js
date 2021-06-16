@@ -32,6 +32,19 @@ exports.postAceInit = (hookName, context) => {
     });
     cssIsFilter = cssIsFilter.join(',');
     css = `
+
+    h1, h1 *,h2, h2 *{
+          pointer-events: none !important;
+        }
+
+        div.ace-line:is([tag="h1"],[tag="h2"],[tag="h3"],[tag="h4"],[tag="h5"],[tag="h6"]){
+          pointer-events: none !important;
+          -webkit-user-modify: read-only;
+          -moz-user-modify: read-only;
+          user-modify: read-only;
+          cursor: default;
+        }
+
         div.ace-line{
           position: relative;
         }
