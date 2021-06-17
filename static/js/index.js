@@ -28,14 +28,10 @@ exports.postAceInit = (hookName, context) => {
     let css = '';
     let cssIsFilter = [];
     filterResult.forEach((val, index) => {
-      cssIsFilter.push(`[parentid="${val.sectionId}"]`);
+      cssIsFilter.push(`[parentid='${val.parentId}']`);
     });
     cssIsFilter = cssIsFilter.join(',');
     css = `
-
-    h1, h1 *,h2, h2 *{
-          pointer-events: none !important;
-        }
 
         div.ace-line:is([tag="h1"],[tag="h2"],[tag="h3"],[tag="h4"],[tag="h5"],[tag="h6"]){
           pointer-events: none !important;
@@ -49,7 +45,7 @@ exports.postAceInit = (hookName, context) => {
           position: relative;
         }
 
-        div.ace-line:not(:is(${cssIsFilter})) *{
+        div.ace-line:not(:is(${cssIsFilter})) * {
           visibility: hidden;
           height:0;
           display:none!important;
