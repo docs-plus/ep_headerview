@@ -3,10 +3,12 @@
     {
       "name": "ep_headerview",
       "client_hooks": {
-        "postAceInit": "ep_headerview/static/js/index"
+        "postAceInit": "ep_headerview/static/js/index",
+        "aceEditorCSS": "ep_headerview/static/js/index"
       },
       "hooks": {
-        "eejsBlock_editbarMenuRight": "ep_headerview/index"
+        "eejsBlock_editbarMenuRight": "ep_headerview/index",
+        "clientVars": "ep_headerview/index"
       }
     }
   ]

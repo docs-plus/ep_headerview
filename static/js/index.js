@@ -3,6 +3,11 @@ const _ = require('underscore');
 
 const $body_ace_outer = () => $(document).find('iframe[name="ace_outer"]').contents();
 
+exports.aceEditorCSS = () => {
+  const version = clientVars.headerView.version || 1;
+  return [`ep_headerview/static/css/innerLayer.css?v=${version}`];
+}
+
 // Bind the event handler to the toolbar buttons
 exports.postAceInit = (hookName, context) => {
   const $filterInput = $('#heading-view');
