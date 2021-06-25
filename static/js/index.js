@@ -13,6 +13,9 @@ exports.postAceInit = (hookName, context) => {
   const $filterInput = $('#heading-view');
   let headerContetnts = [];
   let filterResult = [];
+  let filterValue = "";
+
+  const htags = ["h1", "h2", "h3", "h4", "h5", "h6"]
 
   // append custom style element to the pad inner.
   $body_ace_outer()
@@ -32,10 +35,62 @@ exports.postAceInit = (hookName, context) => {
   const appendCssFilter = () => {
     let css = '';
     let cssIsFilter = [];
+    let sectionIds = []
+    let titleId = []
+    let hTags = []
+
+    let excludeSections = [];
+    let includeSections = [];
+
+
+
     filterResult.forEach((val, index) => {
       cssIsFilter.push(`[parentid='${val.parentId}']`);
+      sectionIds.push(`[sectionid='${val.sectionId}']`);
+      titleId.push(`[sectionid='${val.titleId}']`);
+      hTags.push(val.tag)
+
+      // includeSections.push(`[sectionid='${val.sectionId}'], [parentheader='${val.parentHeader}']`)
     });
+
+    console.log("start", {
+      headerContetnts,
+      filterResult,
+
+    })
+
+
+
+
+    for(const [index, section] of filterResult.entries()){
+
+      // const parentId = section.parentId;
+      const tagIndex = section.tag;
+      const partId = section.partId
+      // const parentHeader = section.parentHeader
+      const sectionId = section.sectionId
+      // const dady = section.dady
+
+      const includeParts = headerContetnts.filter(x => {
+        if(partId === x.parentId & (tagIndex === 1  && x.tag === 2)) return x
+        return x.sectionId === sectionId
+      })
+      .map(x=> {
+          return `[sectionid='${x.sectionId}'],[sectionId='${x.dady}']`
+        })
+        includeSections.push(...includeParts);
+    }
+
+    console.log("filterResult", filterResult)
+    console.log("includeSections", includeSections)
+
     cssIsFilter = cssIsFilter.join(',');
+    sectionIds = sectionIds.join(',');
+    titleId = titleId.join(',');
+
+    if(!includeSections.length) includeSections = []
+    includeSections = includeSections.join(',')
+
     css = `
 
         div.ace-line:is([tag="h1"],[tag="h2"],[tag="h3"],[tag="h4"],[tag="h5"],[tag="h6"]){
@@ -50,10 +105,18 @@ exports.postAceInit = (hookName, context) => {
           position: relative;
         }
 
-        div.ace-line:not(:is(${cssIsFilter})) * {
+        div.ace-line:not(:is(${includeSections})) *   {
           visibility: hidden;
           height:0;
           display:none!important;
+        }
+
+        div.ace-line:is(${titleId}) *  {
+          visibility: visible ;
+          height:inherit;
+          display:block!important;
+          color:red!important;
+
         }
 
         div.ace-line:is(${cssIsFilter}):after,
@@ -139,6 +202,7 @@ exports.postAceInit = (hookName, context) => {
 
     $('#heading-result-msg').html(`<p>${messge}</p>`);
     filterResult = results;
+    filterValue = val
     if (callback) callback(results);
   };
 
@@ -156,15 +220,24 @@ exports.postAceInit = (hookName, context) => {
       const wrapper = $parent.attr('wrapper');
       const parentId = $parent.attr('parentid');
       const sectionId = $parent.attr('sectionid');
-      const tag = $parent.attr('tag');
+      const tag = htags.indexOf($parent.attr('tag'));
+      const titleId = $parent.attr('titleid');
+      const partId = $parent.attr('partid');
+      const parentHeader = $parent.attr('parentheader');
+      const dady = $parent.attr('dady');
 
       const result = {
         text,
         wrapper,
         parentId,
         sectionId,
-        tag
+        tag,
+        titleId,
+        partId,
+        parentHeader,
+        dady
       }
+
 
       headerContetnts.push(result);
     });
