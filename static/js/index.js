@@ -71,13 +71,26 @@ exports.postAceInit = (hookName, context) => {
       const sectionId = section.sectionId
       // const dady = section.dady
 
-      const includeParts = headerContetnts.filter(x => {
-        if(partId === x.parentId & (tagIndex === 1  && x.tag === 2)) return x
-        return x.sectionId === sectionId
+      console.log(section.lnmark)
+
+      const includeParts = section.lnmark.filter((x, index)=>{
+        return x.length && index < tagIndex
+      }).map((x, index) => {
+        // if(index < tagIndex) return false
+        return `[sectionid='${x}']`
       })
-      .map(x=> {
-          return `[sectionid='${x.sectionId}'],[sectionId='${x.dady}']`
-        })
+
+      includeParts.push(`[sectionid='${sectionId}']`)
+
+      console.log(includeParts)
+
+      // const includeParts = headerContetnts.filter(x => {
+      //   if(partId === x.parentId & (tagIndex === 1  && x.tag === 2)) return x
+      //   return x.sectionId === sectionId
+      // })
+      // .map(x=> {
+      //     return `[sectionid='${x.sectionId}'],[sectionId='${x.dady}']`
+      //   })
         includeSections.push(...includeParts);
     }
 
@@ -116,7 +129,6 @@ exports.postAceInit = (hookName, context) => {
           height:inherit;
           display:block!important;
           color:red!important;
-
         }
 
         div.ace-line:is(${cssIsFilter}):after,
@@ -226,6 +238,13 @@ exports.postAceInit = (hookName, context) => {
       const parentHeader = $parent.attr('parentheader');
       const dady = $parent.attr('dady');
 
+      const ln0 = $parent.attr('ln0');
+      const ln1 = $parent.attr('ln1');
+      const ln2 = $parent.attr('ln2');
+      const ln3 = $parent.attr('ln3');
+      const ln4 = $parent.attr('ln4');
+      const ln5 = $parent.attr('ln5');
+
       const result = {
         text,
         wrapper,
@@ -235,7 +254,16 @@ exports.postAceInit = (hookName, context) => {
         titleId,
         partId,
         parentHeader,
-        dady
+        dady,
+        lnmark: [
+          ln0,
+          ln1,
+          ln2,
+          ln3,
+          ln4,
+          ln5,
+        ]
+
       }
 
 
