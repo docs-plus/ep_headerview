@@ -1,6 +1,5 @@
 'use strict';
 const _ = require('underscore');
-
 const $body_ace_outer = () => $(document).find('iframe[name="ace_outer"]').contents();
 
 exports.aceEditorCSS = () => {
@@ -14,7 +13,6 @@ exports.postAceInit = (hookName, context) => {
   let headerContetnts = [];
   let filterResult = [];
   let filterValue = "";
-
   const htags = ["h1", "h2", "h3", "h4", "h5", "h6"]
 
   // append custom style element to the pad inner.
@@ -34,74 +32,32 @@ exports.postAceInit = (hookName, context) => {
 
   const appendCssFilter = () => {
     let css = '';
-    let cssIsFilter = [];
-    let sectionIds = []
-    let titleId = []
-    let hTags = []
-
-    let excludeSections = [];
     let includeSections = [];
 
-
-
-    filterResult.forEach((val, index) => {
-      cssIsFilter.push(`[parentid='${val.parentId}']`);
-      sectionIds.push(`[sectionid='${val.sectionId}']`);
-      titleId.push(`[sectionid='${val.titleId}']`);
-      hTags.push(val.tag)
-
-      // includeSections.push(`[sectionid='${val.sectionId}'], [parentheader='${val.parentHeader}']`)
-    });
-
-    console.log("start", {
-      headerContetnts,
-      filterResult,
-
-    })
-
-
-
-
-    for(const [index, section] of filterResult.entries()){
-
-      // const parentId = section.parentId;
+    for(const  section of filterResult){
+      const titleId = section.titleId;
       const tagIndex = section.tag;
-      const partId = section.partId
-      // const parentHeader = section.parentHeader
-      const sectionId = section.sectionId
-      // const dady = section.dady
+      const lrh1 = section.lrh1
+      includeSections.push(`[sectionid='${titleId}']`);
+      if(tagIndex === 1) {
+        const h1Children = headerContetnts
+        .filter(x => titleId === x.titleId && x.lrh1 === lrh1 && (x.tag === 1||x.tag === 2))
+        .map(x=> `[sectionid='${x.sectionId}']`);
 
-      console.log(section.lnmark)
-
-      const includeParts = section.lnmark.filter((x, index)=>{
-        return x.length && index < tagIndex
-      }).map((x, index) => {
-        // if(index < tagIndex) return false
-        return `[sectionid='${x}']`
-      })
-
-      includeParts.push(`[sectionid='${sectionId}']`)
-
-      console.log(includeParts)
-
-      // const includeParts = headerContetnts.filter(x => {
-      //   if(partId === x.parentId & (tagIndex === 1  && x.tag === 2)) return x
-      //   return x.sectionId === sectionId
-      // })
-      // .map(x=> {
-      //     return `[sectionid='${x.sectionId}'],[sectionId='${x.dady}']`
-      //   })
-        includeSections.push(...includeParts);
+        includeSections.push(...h1Children);
+      }
     }
 
-    console.log("filterResult", filterResult)
-    console.log("includeSections", includeSections)
+    for(const section of filterResult){
+      const tagIndex = section.tag;
 
-    cssIsFilter = cssIsFilter.join(',');
-    sectionIds = sectionIds.join(',');
-    titleId = titleId.join(',');
+      const includeParts = section.lrhMark
+        .filter((x, lrnhIndex)=> x && lrnhIndex <= tagIndex)
+        .map(x => `[sectionid='${x}']`)
 
-    if(!includeSections.length) includeSections = []
+      includeSections.push(...includeParts);
+    }
+
     includeSections = includeSections.join(',')
 
     css = `
@@ -124,15 +80,8 @@ exports.postAceInit = (hookName, context) => {
           display:none!important;
         }
 
-        div.ace-line:is(${titleId}) *  {
-          visibility: visible ;
-          height:inherit;
-          display:block!important;
-          color:red!important;
-        }
-
-        div.ace-line:is(${cssIsFilter}):after,
-        div.ace-line:is(${cssIsFilter}):before{
+        div.ace-line:is(${includeSections}):after,
+        div.ace-line:is(${includeSections}):before{
           position: relative;
           font-size: 1.5em;
           height: 1em;
@@ -140,10 +89,10 @@ exports.postAceInit = (hookName, context) => {
           width: 114%;
         }
 
-        div.ace-line:not(:is(${cssIsFilter})):after,
-        div.ace-line:not(:is(${cssIsFilter})):before,
-        div.ace-line:not(:is(${cssIsFilter})):after,
-        div.ace-line:not(:is(${cssIsFilter})):before{
+        div.ace-line:not(:is(${includeSections})):after,
+        div.ace-line:not(:is(${includeSections})):before,
+        div.ace-line:not(:is(${includeSections})):after,
+        div.ace-line:not(:is(${includeSections})):before{
           content: "";
           display: block;
           position: absolute;
@@ -156,19 +105,19 @@ exports.postAceInit = (hookName, context) => {
           transform: translate(-50%,-30px)!important;
         }
 
-        div.ace-line:not(:is(${cssIsFilter})):after,
-        div.ace-line:not(:is(${cssIsFilter})):after{
+        div.ace-line:not(:is(${includeSections})):after,
+        div.ace-line:not(:is(${includeSections})):after{
           -webkit-filter: drop-shadow(hsla(0, 0%, 80%, 0.2) 0px 0px 10px);
 
         }
 
-        div.ace-line:not(:is(${cssIsFilter})):after,
-        div.ace-line:not(:is(${cssIsFilter})):before{
+        div.ace-line:not(:is(${includeSections})):after,
+        div.ace-line:not(:is(${includeSections})):before{
           transform: translateY(-20px);
         }
 
-        div.ace-line:not(:is(${cssIsFilter})):after,
-        div.ace-line:not(:is(${cssIsFilter})):after{
+        div.ace-line:not(:is(${includeSections})):after,
+        div.ace-line:not(:is(${includeSections})):after{
           background-image:
           linear-gradient(135deg, hsla(210deg 17% 98%) 30%, transparent 30%),
           linear-gradient(225deg, hsla(210deg 17% 98%) 30%, transparent 30%);
@@ -176,8 +125,8 @@ exports.postAceInit = (hookName, context) => {
           top: 0.5em;
         }
 
-        div.ace-line:not(:is(${cssIsFilter})):before,
-        div.ace-line:not(:is(${cssIsFilter})):before{
+        div.ace-line:not(:is(${includeSections})):before,
+        div.ace-line:not(:is(${includeSections})):before{
           background-image:
           linear-gradient(315deg, hsla(210deg 17% 98%) 30%, transparent 30%),
           linear-gradient(45deg, hsla(210deg 17% 98%) 30%, transparent 30%);
@@ -185,8 +134,8 @@ exports.postAceInit = (hookName, context) => {
           top: -0.5em;
         }
 
-        div.ace-line:not(:is(${cssIsFilter})){ margin-top:30px; }
-        div.ace-line:not(:is(${cssIsFilter})){ margin-bottom:30px; }
+        div.ace-line:not(:is(${includeSections})){ margin-top:30px; }
+        div.ace-line:not(:is(${includeSections})){ margin-bottom:30px; }
       `;
 
     $body_ace_outer()
@@ -228,42 +177,33 @@ exports.postAceInit = (hookName, context) => {
     headers.each(function () {
       const text = $(this).text();
       const $parent = $(this).parent();
-
-      const wrapper = $parent.attr('wrapper');
-      const parentId = $parent.attr('parentid');
       const sectionId = $parent.attr('sectionid');
       const tag = htags.indexOf($parent.attr('tag'));
       const titleId = $parent.attr('titleid');
-      const partId = $parent.attr('partid');
-      const parentHeader = $parent.attr('parentheader');
-      const dady = $parent.attr('dady');
 
-      const ln0 = $parent.attr('ln0');
-      const ln1 = $parent.attr('ln1');
-      const ln2 = $parent.attr('ln2');
-      const ln3 = $parent.attr('ln3');
-      const ln4 = $parent.attr('ln4');
-      const ln5 = $parent.attr('ln5');
+      const lrh0 = $parent.attr('lrh0');
+      const lrh1 = $parent.attr('lrh1');
+      const lrh2 = $parent.attr('lrh2');
+      const lrh3 = $parent.attr('lrh3');
+      const lrh4 = $parent.attr('lrh4');
+      const lrh5 = $parent.attr('lrh5');
+      const lrh6 = $parent.attr('lrh6');
 
       const result = {
         text,
-        wrapper,
-        parentId,
         sectionId,
         tag,
         titleId,
-        partId,
-        parentHeader,
-        dady,
-        lnmark: [
-          ln0,
-          ln1,
-          ln2,
-          ln3,
-          ln4,
-          ln5,
+        lrh1,
+        lrhMark: [
+          lrh0,
+          lrh1,
+          lrh2,
+          lrh3,
+          lrh4,
+          lrh5,
+          lrh6,
         ]
-
       }
 
 
