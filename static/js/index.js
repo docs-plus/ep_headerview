@@ -34,26 +34,14 @@ exports.postAceInit = (hookName, context) => {
     let css = '';
     let includeSections = [];
 
-    for(const  section of filterResult){
-      const titleId = section.titleId;
-      const tagIndex = section.tag;
-      const lrh1 = section.lrh1
-      includeSections.push(`[sectionid='${titleId}']`);
-      if(tagIndex === 1) {
-        const h1Children = headerContetnts
-        .filter(x => titleId === x.titleId && x.lrh1 === lrh1 && (x.tag === 1||x.tag === 2))
-        .map(x=> `[sectionid='${x.sectionId}']`);
-
-        includeSections.push(...h1Children);
-      }
-    }
-
     for(const section of filterResult){
       const tagIndex = section.tag;
+      const titleId = section.titleId;
+      includeSections.push(`[sectionid='${titleId}']`);
 
       const includeParts = section.lrhMark
         .filter((x, lrnhIndex)=> x && lrnhIndex <= tagIndex)
-        .map(x => `[sectionid='${x}']`)
+        .map(x => `[sectionid='${x}'],[titleid='${titleId}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}'][lrh${tagIndex -1}='${section.lrhMark[tagIndex -1]}']`) // ,[titleid='${titleId}'][lrh${tagIndex}='${x}']
 
       includeSections.push(...includeParts);
     }
