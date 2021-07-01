@@ -10,10 +10,9 @@ exports.eejsBlock_editbarMenuRight = (hookName, args, cb) => {
 
 
 exports.clientVars = (hook, context, callback) => {
-
   const result = {
     version: packageJson.version,
-  }
+  };
 
   return callback({headerView: result});
-}
+};
