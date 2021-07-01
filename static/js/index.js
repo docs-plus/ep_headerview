@@ -41,7 +41,9 @@ exports.postAceInit = (hookName, context) => {
 
       const includeParts = section.lrhMark
         .filter((x, lrnhIndex)=> x && lrnhIndex <= tagIndex)
-        .map(x => `[sectionid='${x}'],[titleid='${titleId}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}'][lrh${tagIndex -1}='${section.lrhMark[tagIndex -1]}']`) // ,[titleid='${titleId}'][lrh${tagIndex}='${x}']
+        .map(x => {
+          return `[sectionid='${x}'],[titleid='${titleId}'][lrh${tagIndex - 1}='${section.lrhMark[tagIndex - 1]}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`
+        });
 
       includeSections.push(...includeParts);
     }
