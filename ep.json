@@ -8,7 +8,8 @@
       },
       "hooks": {
         "eejsBlock_editbarMenuRight": "ep_headerview/index",
-        "clientVars": "ep_headerview/index"
+        "clientVars": "ep_headerview/index",
+        "socketio": "ep_headerview/index"
       }
     }
   ]

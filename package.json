@@ -1,7 +1,7 @@
 {
   "name": "ep_headerview",
   "description": "Another docsplus plugin, filter sections",
-  "version": "0.3.3",
+  "version": "0.5.0",
   "scripts": {
     "lint": "eslint --fix ."
   },
@@ -16,7 +16,6 @@
     "eslint-plugin-mocha": "^8.0.0",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prefer-arrow": "^1.2.2",
-    "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-you-dont-need-lodash-underscore": "^6.10.0"
   },
   "eslintConfig": {
@@ -24,6 +23,7 @@
     "extends": "etherpad/plugin"
   },
   "dependencies": {
+    "slugify": "^1.5.3",
     "underscore": "^1.13.1"
   }
 }

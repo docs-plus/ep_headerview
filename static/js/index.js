@@ -1,19 +1,42 @@
-'use strict';
 const _ = require('underscore');
+const slugify = require('./slugify');
+const randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
+
 const $body_ace_outer = () => $(document).find('iframe[name="ace_outer"]').contents();
 
 exports.aceEditorCSS = () => {
   const version = clientVars.headerView.version || 1;
   return [`ep_headerview/static/css/innerLayer.css?v=${version}`];
-}
+};
 
 // Bind the event handler to the toolbar buttons
 exports.postAceInit = (hookName, context) => {
-  const $filterInput = $('#heading-view');
+  const loc = document.location;
+  const port = loc.port === '' ? loc.protocol === 'https:' ? 443 : 80 : loc.port;
+  let socketURL = `${loc.protocol}//${loc.hostname}:${port}`;
+
+  socketURL = `${socketURL}/headerview`;
+
+  const socket = io.connect(socketURL, {
+    query: `padId=${clientVars.padId}`,
+  });
+
+  socket.on('disconnect', (reason) => {
+    console.error('[headerView]: socket disconnection, reason:', reason);
+  });
+
+  socket.on('connect_error', (error) => {
+    console.error('[headerView]: socket connect_error:', error);
+  });
+
+
+  let filterList = [];
   let headerContetnts = [];
   let filterResult = [];
-  let filterValue = "";
-  const htags = ["h1", "h2", "h3", "h4", "h5", "h6"]
+  let filterValue = '';
+  const htags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
+  let activeFilter;
+  const undoTimeList = {};
 
   // append custom style element to the pad inner.
   $body_ace_outer()
@@ -22,33 +45,29 @@ exports.postAceInit = (hookName, context) => {
       .find('head')
       .append('<style id="customHeader"></style>');
 
-  const clearCssFilter = () => {
-    return  $body_ace_outer()
+  const clearCssFilter = () => $body_ace_outer()
       .find('iframe')
       .contents()
       .find('head #customHeader')
       .html('');
-  }
 
   const appendCssFilter = () => {
     let css = '';
     let includeSections = [];
 
-    for(const section of filterResult){
+    for (const section of filterResult) {
       const tagIndex = section.tag;
       const titleId = section.titleId;
       includeSections.push(`[sectionid='${titleId}']`);
 
       const includeParts = section.lrhMark
-        .filter((x, lrnhIndex)=> x && lrnhIndex <= tagIndex)
-        .map(x => {
-          return `[sectionid='${x}'],[titleid='${titleId}'][lrh${tagIndex - 1}='${section.lrhMark[tagIndex - 1]}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`
-        });
+          .filter((x, lrnhIndex) => x && lrnhIndex <= tagIndex)
+          .map((x) => `[sectionid='${x}'],[titleid='${titleId}'][lrh${tagIndex - 1}='${section.lrhMark[tagIndex - 1]}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`);
 
       includeSections.push(...includeParts);
     }
 
-    includeSections = includeSections.join(',')
+    includeSections = includeSections.join(',');
 
     css = `
 
@@ -136,24 +155,39 @@ exports.postAceInit = (hookName, context) => {
   };
 
   const evaluateSearchResult = (value, callback) => {
+    const activatedFilter = window.history.state === null? null: window.history.state.filter;
+    if (activatedFilter) activeFilter = activatedFilter;
+
     const val = $(value).val() || value;
-    if(!val) return;
+    if (!val || val.length <= 0) return false;
     const regEx = new RegExp(val, 'gi');
     const results = headerContetnts.filter((x) => x.text.match(regEx));
+    const slug = val && slugify(val, {lower: true, strict: true});
 
-    let messge = 'Opps! No results found.';
-    if (results.length) {
-      const result = results.length === 1 ? 'result' : 'results';
-      messge = `About <b>${results.length}</b> ${result} found.`;
-    } else {
-      $('#heading-result-msg').addClass('active');
+    if (val && doesFilterExist(slug)) {
+      // clear form
+      $('#filter_url').val('(autofill)');
+      $('.btn_createFilter').removeClass('active').attr('disable', true);
+      $('.filterNumResults').text(0);
+      return false;
     }
 
-    if (val.length <= 1) messge = 'Search through the headers';
+    if (results.length) {
+      $('.btn_createFilter').attr('disabled', false).addClass('active');
+    } else {
+      $('.btn_createFilter').removeAttr('disabled').removeClass('active');
+    }
 
-    $('#heading-result-msg').html(`<p>${messge}</p>`);
+    $('.filterNumResults').html(results.length);
+
+    if (val.length) {
+      $('#filter_url').val(slugify(val, {lower: true, strict: true}));
+    } else {
+      $('#filter_url').val('(autofill)');
+    }
+
     filterResult = results;
-    filterValue = val
+    filterValue = val;
     if (callback) callback(results);
   };
 
@@ -193,73 +227,32 @@ exports.postAceInit = (hookName, context) => {
           lrh4,
           lrh5,
           lrh6,
-        ]
-      }
-
+        ],
+      };
 
       headerContetnts.push(result);
     });
+
+    $('.modal_filter .totalHeader').text(headerContetnts.length);
 
     if (callback) callback(headerContetnts);
   };
 
   if (clientVars.padId !== clientVars.padView) {
-    $('#headerView').show();
-    $('#heading-view').val(clientVars.padName);
+    //TODO: unexpected url
+
+    const filterName = clientVars.padName || window.history.state.filter.name;
 
     setTimeout(() => {
       updateHeaderList((headerContetnts) => {
-        evaluateSearchResult($filterInput.val(), (result) => {
+        evaluateSearchResult(filterName, (result) => {
           appendCssFilter();
         });
       });
     }, 1000);
-
   }
 
   const searchResult = _.debounce(evaluateSearchResult, 300);
-
-  $filterInput
-      .focusin(function () {
-        const inputText = $(this).val();
-        $('#heading-result-msg').addClass('active');
-        searchResult(inputText);
-        if (inputText) {
-          $('.btn-clearInput').addClass('active');
-        } else {
-          $('.btn-clearInput').removeClass('active');
-        }
-        updateHeaderList();
-      })
-      .focusout(function () {
-        const inputText = $(this).val();
-        $('#heading-result-msg').removeClass('active');
-        if (inputText.length) {
-          $('.btn-clearInput').addClass('active');
-        } else {
-          $('.btn-clearInput').removeClass('active');
-        }
-      })
-      .keypress((event) => {
-      // enter
-        if (event.which === 13 && filterResult.length) {
-          appendCssFilter();
-          updateHeaderList();
-        } else {
-        // TODO: performance issue
-          clearCssFilter();
-          updateHeaderList();
-        }
-      })
-      .keyup(function () {
-        const inputText = $(this).val();
-        if (inputText.length) {
-          $('.btn-clearInput').addClass('active');
-        } else {
-          $('.btn-clearInput').removeClass('active');
-        }
-        searchResult(this);
-      });
 
   $('.btn-clearInput').on('click', function () {
     $('#heading-view').val('');
@@ -268,4 +261,213 @@ exports.postAceInit = (hookName, context) => {
     $('#heading-result-msg').html('<p>Search through the headers</p>');
     updateHeaderList();
   });
+
+
+  // ================>>>><<<<================== //
+  // ================>>>><<<<================== //
+
+  const adoptFilterModalPosition = () => {
+    const pos = $('button#btn_filterView').offset();
+    const modalWith = $('.modal_filter').outerWidth(true);
+    const btnFilterWith = $('button#btn_filterView').outerWidth(true);
+
+    $('.modal_filter')
+        .css({left: pos.left - modalWith + btnFilterWith});
+  };
+
+
+  $(window).resize(_.debounce(adoptFilterModalPosition, 250));
+
+
+  const removeFilter = ({filterId}) => {
+    if (!$('.section_filterList ul li').length) {
+      $('.section_filterList ul').append('<li class="filterEmpty"><p>There is no filter <br> create the first filter</p></li>');
+    }
+    $(`.section_filterList ul li.row_${filterId}`).remove();
+  };
+
+  const appendFilter = ({filterName, filterId, filterUrl}) => {
+    let active = false;
+
+    if (clientVars.padId !== clientVars.padView) active = window.history.state.filter.id === filterId ? true : false;
+
+    const newFilter = $('#filter_listItem').tmpl({
+      filterName,
+      filterUrl,
+      filterId,
+      active,
+    });
+
+    if ($('.section_filterList ul li').length) $('.section_filterList ul .filterEmpty').remove();
+
+    if (!$(`.section_filterList ul li.row_${filterId}`).length) $('.section_filterList ul').append(`<li class="row_${filterId}" active="${active}">${$(newFilter).html()}</li>`);
+  };
+
+  socket.on('addNewFilter', appendFilter);
+
+  socket.on('removeFilter', removeFilter);
+
+  const clearFilterListSection = () => {
+    $('.section_filterList ul li').remove();
+    $('.section_filterList ul').append('<li class="filterEmpty"><p>There is no filter <br> create the first filter</p></li>');
+  };
+
+  $('button#btn_filterView').on('click', () => {
+    socket.emit('getFilterList', clientVars.padId, (list) => {
+      filterList = list;
+      clearFilterListSection();
+      filterList.forEach((row) => {
+        if (!row) return;
+        appendFilter(row);
+      });
+    });
+  });
+
+  $('button#btn_filterView, .modal_filter button.btn_closeModal').on('click', () => {
+    const pos = $('button#btn_filterView').offset();
+    const modalWith = $('.modal_filter').outerWidth(true);
+    const btnFilterWith = $('button#btn_filterView').outerWidth(true);
+
+    $('.modal_filter')
+        .toggleClass('active')
+        .css({left: pos.left - modalWith + btnFilterWith});
+
+    $('#btn_filterView').toggleClass('active');
+    updateHeaderList();
+  });
+
+  $('.modal_filter  input#filter_name')
+      .focusin(function () {
+        const inputText = $(this).val();
+        $('.filterNumResults').addClass('active');
+        searchResult(inputText);
+      })
+      .focusout(function () {
+        const inputText = $(this).val();
+        $('.filterNumResults').removeClass('active');
+      })
+      .keypress((event) => {})
+      .keyup(function () {
+        const inputText = $(this).val();
+        searchResult(this);
+      });
+
+  const doesFilterExist = (filterUrl) => {
+    return filterList.filter((x) => x.filterUrl === filterUrl).length > 0 ? true : false;
+  };
+
+  $('.btn_createFilter').on('click', () => {
+    const filterName = $('#filter_name').val();
+    const filterUrl = $('#filter_url').val();
+    const filterId = randomString();
+
+    if (!filterName) return false;
+
+    // submit filter
+    socket.emit('addNewFilter', clientVars.padId, {filterName, filterUrl, filterId}, (res) => {
+      appendFilter(res);
+      if (!doesFilterExist(filterUrl)) filterList.push({filterName, filterUrl, filterId});
+    });
+
+    // clear form
+    $('#filter_name').val('');
+    $('#filter_url').val('(autofill)');
+    $('.btn_createFilter').removeClass('active').attr('disable', true);
+    $('.filterNumResults').text(0);
+  });
+
+  $(document).on('click', '.btn_filter_remove', function () {
+    const filterId = $(this).attr('filter-id');
+    const filterName = $(this).attr('filter-name');
+    const filterUrl = $(this).attr('filter-url');
+
+    const undoRow = $('#filter_remove_undo').tmpl({
+      filterId,
+      filterName,
+      filterUrl,
+    });
+
+    $(`.section_filterList ul li.row_${filterId}`).html(undoRow);
+
+    undoTimeList[filterId] = setTimeout(() => {
+      $(`.section_filterList ul li.row_${filterId}`).remove();
+      delete undoTimeList[filterId];
+      socket.emit('removeFilter', clientVars.padId, {filterId}, (res) => {
+        if (doesFilterExist(filterUrl)) filterList = filterList.filter((x) => x.filterUrl !== filterUrl);
+        if (!$('.section_filterList ul li').length) {
+          $('.section_filterList ul').append('<li class="filterEmpty"><p>There is no filter <br> create the first filter</p></li>');
+        }
+      });
+    }, 2000);
+  });
+
+  $(document).on('click', '.btn_undoDelete', function () {
+    const filterId = $(this).attr('filter-id');
+    const filterName = $(this).attr('filter-name');
+    const filterUrl = $(this).attr('filter-url');
+
+    clearTimeout(undoTimeList[filterId]);
+    delete undoTimeList[filterId];
+
+    const rowFilter = $('#filter_listItem').tmpl({
+      filterId,
+      filterName,
+      filterUrl,
+    });
+    $(`.section_filterList ul li.row_${filterId}`).html(`<li class="row_${filterId}">${$(rowFilter).html()}</li>`);
+  });
+
+  $(document).on('click', 'btn_filter_update', function () {
+    const filterId = $(this).attr('filter-id');
+    const filterName = $(this).attr('filter-name');
+    const filterUrl = $(this).attr('filter-url');
+
+    const newRowFilter = $('#filter_listItem').tmpl({
+      filterId,
+      filterName,
+      filterUrl,
+    });
+
+    $(`.section_filterList ul li.row_${filterId}`).html(`<li class="row_${filterId}">${$(newRowFilter).html()}</li>`);
+
+    socket.emit('editeFilter', clientVars.padId, {filterId, filterName, filterUrl}, (res) => {});
+  });
+
+  $(document).on('click', '.btn_filter_act[active="false"]', function () {
+    const filterUrl = $(this).attr('filter-url');
+    const filterId = $(this).attr('filter-id');
+    const filterName = $(this).attr('filter-name');
+
+    let path = location.pathname;
+
+    if (clientVars.padId !== clientVars.padView) {
+      path = path.split('/');
+      path.pop();
+      path = path.join('/');
+    }
+
+    const newPath = `${path}/${filterUrl}`;
+
+    const filter = {
+      id: filterId,
+      name: filterName,
+      url: filterUrl,
+    };
+
+    window.history.pushState({filter}, filterUrl, newPath);
+    window.location.href = newPath;
+  });
+
+  $(document).on('click', '.btn_filter_act[active="true"]', () => {
+    let path = location.pathname.split('/');
+    path.pop();
+    const pageTitle = path[path.length - 1];
+    path = path.join('/');
+
+    const filter = {};
+
+    window.history.pushState({filter}, pageTitle, path);
+    window.location.href = path;
+  });
+
 };
