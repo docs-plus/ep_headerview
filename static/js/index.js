@@ -239,17 +239,46 @@ exports.postAceInit = (hookName, context) => {
   };
 
   if (clientVars.padId !== clientVars.padView) {
-    //TODO: unexpected url
 
     const filterName = clientVars.padName || window.history.state.filter.name;
 
     setTimeout(() => {
       updateHeaderList((headerContetnts) => {
         evaluateSearchResult(filterName, (result) => {
-          appendCssFilter();
+          socket.emit('getFilterList', clientVars.padId, (list) => {
+            let filter = list.find(x => x.filterUrl === clientVars.padName)
+            //if filter does not exist, create a new filter
+            if(!filter) {
+
+              const filterName = clientVars.padName;
+              const filterUrl = slugify(filterName);
+              const filterId = randomString();
+
+              socket.emit('addNewFilter', clientVars.padId, {filterName, filterUrl, filterId}, (res) => {
+                filter = {
+                  id: filterId,
+                  name: filterName,
+                  url: filterUrl
+                }
+
+                if(!window.history.state) window.history.pushState({filter}, document.title)
+                appendCssFilter();
+              });
+            } else {
+              filter = {
+                id: filter.filterId,
+                name: filter.filterName,
+                url: filter.filterUrl
+              }
+              if(!window.history.state) window.history.pushState({filter}, document.title)
+              appendCssFilter();
+            }
+
+          });
         });
       });
     }, 1000);
+
   }
 
   const searchResult = _.debounce(evaluateSearchResult, 300);
@@ -289,7 +318,8 @@ exports.postAceInit = (hookName, context) => {
   const appendFilter = ({filterName, filterId, filterUrl}) => {
     let active = false;
 
-    if (clientVars.padId !== clientVars.padView) active = window.history.state.filter.id === filterId ? true : false;
+    if (clientVars.padId !== clientVars.padView)
+      active = window.history.state && window.history.state.filter.id === filterId ? true : false;
 
     const newFilter = $('#filter_listItem').tmpl({
       filterName,
