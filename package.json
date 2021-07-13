@@ -3,24 +3,30 @@
   "description": "Another docsplus plugin, filter sections",
   "version": "0.5.2",
   "scripts": {
-    "lint": "eslint --fix ."
+    "lint": "standard  --fix"
   },
   "author": {
     "name": "Hossein Marzban",
     "email": "marzban98@gmail.com"
   },
   "devDependencies": {
-    "eslint": "^7.17.0",
-    "eslint-config-etherpad": "^1.0.21",
-    "eslint-plugin-eslint-comments": "^3.2.0",
-    "eslint-plugin-mocha": "^8.0.0",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-prefer-arrow": "^1.2.2",
-    "eslint-plugin-you-dont-need-lodash-underscore": "^6.10.0"
+    "standard": "^16.0.3"
   },
-  "eslintConfig": {
-    "root": true,
-    "extends": "etherpad/plugin"
+  "standard": {
+    "env": {
+     "browser": true,
+     "node": true,
+     "amd": true,
+     "jquery": true,
+     "es6": true
+    },
+    "globals": [
+      "clientVars",
+      "io"
+    ],
+    "ignore": [
+      "/static/js/slugify.js"
+    ]
   },
   "dependencies": {
     "slugify": "^1.5.3",
