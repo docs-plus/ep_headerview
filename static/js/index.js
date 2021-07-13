@@ -96,7 +96,6 @@ exports.postAceInit = (hookName, context) => {
           border: 0;
           width: 114%;
         }
-
         div.ace-line:not(:is(${includeSections})):after,
         div.ace-line:not(:is(${includeSections})):before,
         div.ace-line:not(:is(${includeSections})):after,
@@ -113,11 +112,10 @@ exports.postAceInit = (hookName, context) => {
           transform: translate(-50%,-30px)!important;
         }
 
-        div.ace-line:not(:is(${includeSections})):after,
-        div.ace-line:not(:is(${includeSections})):after{
-          -webkit-filter: drop-shadow(hsla(0, 0%, 80%, 0.2) 0px 0px 10px);
-
-        }
+        // div.ace-line:not(:is(${includeSections})):after,
+        // div.ace-line:not(:is(${includeSections})):after{
+        //   -webkit-filter: drop-shadow(hsla(0, 0%, 80%, 0.2) 0px 0px 10px);
+        // }
 
         div.ace-line:not(:is(${includeSections})):after,
         div.ace-line:not(:is(${includeSections})):before{
@@ -127,8 +125,8 @@ exports.postAceInit = (hookName, context) => {
         div.ace-line:not(:is(${includeSections})):after,
         div.ace-line:not(:is(${includeSections})):after{
           background-image:
-          linear-gradient(135deg, hsla(210deg 17% 98%) 30%, transparent 30%),
-          linear-gradient(225deg, hsla(210deg 17% 98%) 30%, transparent 30%);
+          linear-gradient(135deg, hsla(210deg 20% 95%) 30%, transparent 30%),
+          linear-gradient(225deg, hsla(210deg 20% 95%) 30%, transparent 30%);
           background-position: -webkit-calc(50% - 1em);
           top: 0.5em;
         }
@@ -136,8 +134,8 @@ exports.postAceInit = (hookName, context) => {
         div.ace-line:not(:is(${includeSections})):before,
         div.ace-line:not(:is(${includeSections})):before{
           background-image:
-          linear-gradient(315deg, hsla(210deg 17% 98%) 30%, transparent 30%),
-          linear-gradient(45deg, hsla(210deg 17% 98%) 30%, transparent 30%);
+          linear-gradient(315deg, hsla(210deg 20% 95%) 30%, transparent 30%),
+          linear-gradient(45deg, hsla(210deg 20% 95%) 30%, transparent 30%);
           background-position: 50%;
           top: -0.5em;
         }
