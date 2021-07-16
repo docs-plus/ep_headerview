@@ -435,7 +435,7 @@ exports.postAceInit = (hookName, context) => {
 
     let filterURL =  path.split('/').splice(3, currentPath.length - 1)
 
-    filterURL = filterURL.length ? filterURL : filterUrl
+    filterURL = filterURL.length ? filterURL : [filterUrl]
 
     const filter = {
       name: filterName,
