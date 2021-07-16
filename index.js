@@ -21,40 +21,29 @@ const db = require('./server/dbRepository')
 exports.socketio = (hookName, args, cb) => {
   const io = args.io.of('/headerview')
   io.on('connection', (socket) => {
-    socket.on('addNewFilter', async (padId, { filterId, filterUrl, filterName }, callback) => {
-      const key = `filters:${padId}:${filterId}`
-      const newFilter = { filterId, filterUrl, filterName }
-      console.log('asdasd', key, newFilter)
-      await db.set(key, newFilter)
+    socket.on('addNewFilter', async (padId, filter, callback) => {
+      const key = `filters:${padId}:${filter.id}`
+      console.info('Add new Filter', key, filter)
+      await db.set(key, filter)
         .catch((error) => {
           console.error('[headerview]: ', error)
           callback(false)
         })
 
-      socket.broadcast.to(padId).emit('addNewFilter', { filterId, filterUrl, filterName })
+      socket.broadcast.to(padId).emit('addNewFilter', filter)
 
-      callback({ filterId, filterUrl, filterName })
+      callback(filter)
     })
 
-    socket.on('editeFilter', async (padId, { filterId, filterUrl, filterName }, callback) => {
-      const key = `filters:${padId}:${filterId}`
-      const newFilter = { filterId, filterUrl, filterName }
-      await db.set(key, JSON.stringify(newFilter))
-        .catch((error) => {
-          console.error('[headerview]: ', error)
-          callback(false)
-        })
-      callback(true)
-    })
 
-    socket.on('removeFilter', async (padId, { filterId }, callback) => {
-      await db.remove(`filters:${padId}:${filterId}`)
+    socket.on('removeFilter', async (padId, filter, callback) => {
+      await db.remove(`filters:${padId}:${filter.id}`)
         .catch((error) => {
           console.error('[headerview]: ', error)
           callback(false)
         })
 
-      socket.broadcast.to(padId).emit('removeFilter', { filterId })
+      socket.broadcast.to(padId).emit('removeFilter', filter)
       callback(true)
     })
 
