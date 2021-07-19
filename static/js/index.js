@@ -275,7 +275,9 @@ exports.postAceInit = (hookName, context) => {
             const prevPath = currentPath
             if (!doesHaveChildren) prevPath.pop()
 
-            const filterURL = currentPath.splice(3, currentPath.length - 1)
+            const doesHaveP = location.pathname.split('/').indexOf('p')
+
+            const filterURL = currentPath.splice((doesHaveP ? 3 : 2), currentPath.length - 1)
 
             const filterId = randomString()
 
@@ -347,8 +349,10 @@ exports.postAceInit = (hookName, context) => {
     if (clientVars.padId !== clientVars.padView) {
       // active = (window.history.state && window.history.state.filter.id === filter.id) || (window.history.state.filter.prevPath === filter.path) || highliteRowList.includes(filter.path)
       active = (window.history.state && window.history.state.filter.parentId === filter.parentId)
-      activeFilterId = filter.id
+      activeFilterId = window.history.state.filter.parentId
     }
+
+    console.log("activated filter Id", activeFilterId)
 
     if (!filterList.has(filter.id)) filterList.set(filter.id, filter)
 
@@ -430,7 +434,9 @@ exports.postAceInit = (hookName, context) => {
 
     const path = `${location.pathname}/${filterUrl}`
 
-    const filterURL = path.split('/').splice(3, currentPath.length - 1)
+    const doesHaveP = location.pathname.split('/').indexOf('p')
+
+    const filterURL = path.split('/').splice((doesHaveP ? 3 : 2), currentPath.length - 1)
 
     console.log(doesHaveChildren, filterURL)
 
