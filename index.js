@@ -35,7 +35,6 @@ exports.socketio = (hookName, args, cb) => {
       callback(filter)
     })
 
-
     socket.on('removeFilter', async (padId, filter, callback) => {
       await db.remove(`filters:${padId}:${filter.id}`)
         .catch((error) => {
