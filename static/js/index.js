@@ -270,12 +270,12 @@ exports.postAceInit = (hookName, context) => {
           // if filter does not exist, create a new filter
           if (!filter) {
             const currentPath = location.pathname.split('/')
-            const doesHaveChildren = currentPath.lastIndexOf(clientVars.padName)
+            const doesHaveChildren = currentPath.lastIndexOf(clientVars.padName) > 0 ? true : false
 
             const prevPath = currentPath
             if (!doesHaveChildren) prevPath.pop()
 
-            const doesHaveP = location.pathname.split('/').indexOf('p')
+            location.pathname.split('/').indexOf('p') > 0 ? true: false
 
             const filterURL = currentPath.splice((doesHaveP ? 3 : 2), currentPath.length - 1)
 
@@ -427,14 +427,14 @@ exports.postAceInit = (hookName, context) => {
     }
 
     const currentPath = location.pathname.split('/')
-    const doesHaveChildren = currentPath.lastIndexOf(clientVars.padName)
+    const doesHaveChildren = currentPath.lastIndexOf(clientVars.padName) > 0 ? true : false
 
     const prevPath = currentPath
     if (!doesHaveChildren) prevPath.pop()
 
     const path = `${location.pathname}/${filterUrl}`
 
-    const doesHaveP = location.pathname.split('/').indexOf('p')
+    const doesHaveP = location.pathname.split('/').indexOf('p') > 0 ? true: false
 
     const filterURL = path.split('/').splice((doesHaveP ? 3 : 2), currentPath.length - 1)
 
