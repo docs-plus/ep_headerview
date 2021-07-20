@@ -9,7 +9,6 @@ exports.aceEditorCSS = () => {
   return [`ep_headerview/static/css/innerLayer.css?v=${version}`]
 }
 
-// Bind the event handler to the toolbar buttons
 exports.postAceInit = (hookName, context) => {
   const loc = document.location
   const port = loc.port === '' ? loc.protocol === 'https:' ? 443 : 80 : loc.port
@@ -38,8 +37,8 @@ exports.postAceInit = (hookName, context) => {
   const htags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']
   // let activeFilter
   const undoTimeList = {}
-  let filterUrlPrefix = []
   const filterList = new Map()
+  const parentHSections =  new Set()
 
   let activeFilterId
 
@@ -50,14 +49,11 @@ exports.postAceInit = (hookName, context) => {
     .find('head')
     .append('<style id="customHeader"></style>')
 
-  const clearCssFilter = () => $bodyAceOuter()
-    .find('iframe')
-    .contents()
-    .find('head #customHeader')
-    .html('')
-
   const appendCssFilter = () => {
     let css = ''
+
+    console.log("appendCssFilter=>>",window.history.state)
+
 
     for (const section of filterResult) {
       const tagIndex = section.tag
@@ -71,9 +67,9 @@ exports.postAceInit = (hookName, context) => {
       includeSections.push(...includeParts)
     }
 
+    console.log(includeSections)
     includeSections = includeSections.join(',')
 
-    console.log(includeSections)
 
     css = `
 
@@ -186,11 +182,20 @@ exports.postAceInit = (hookName, context) => {
 
     $('.filterNumResults').text(typeof value !== 'string' ? results.length : 0)
 
-    if (filterUrlPrefix) $('.filter_urlPrefix').text(`${filterUrlPrefix.join('/')}/`)
-
     if (val.length && $('#filter_name').val().length) $('#filter_url').val(slugify(val, { lower: true, strict: true }))
 
     filterResult = results
+
+    filterResult.forEach(x => parentHSections.add(x.titleId))
+
+    // const filter = window.history.state.filter
+
+    // if(filter) {
+    //   Object.assign(filter, {parentHSections: [...parentHSections]})
+    //   window.history.pushState({filter}, document.title)
+    // }
+
+
     // filterValue = val
     if (callback) callback(results)
   }
@@ -256,26 +261,28 @@ exports.postAceInit = (hookName, context) => {
     if (callback) callback(headerContetnts)
   }
 
+  const searchResult = _.debounce(evaluateSearchResult, 300)
+
+  // ================>>>><<<<================== //
+  // ================>>>><<<<================== //
+
   if (clientVars.padId !== clientVars.padView) {
     // const filterName = clientVars.padName || window.history.state.filter.name
-
-    filterUrlPrefix = window.location.pathname.split('/')
-    filterUrlPrefix = filterUrlPrefix.splice(3, filterUrlPrefix.length + 1)
 
     setTimeout(() => {
       updateHeaderList((headerContetnts) => {
         socket.emit('getFilterList', clientVars.padId, (list) => {
-          const filter = list.find((x) => x.path === location.pathname)
+          let filter = list.find((x) => x.path === location.pathname)
           console.log(filter, '=-=-=-=-sssss=-=-=-=-', list)
           // if filter does not exist, create a new filter
           if (!filter) {
             const currentPath = location.pathname.split('/')
-            const doesHaveChildren = currentPath.lastIndexOf(clientVars.padName) > 0 ? true : false
+            const doesHaveChildren = currentPath.lastIndexOf(clientVars.padName) > 0
 
             const prevPath = currentPath
             if (!doesHaveChildren) prevPath.pop()
 
-            location.pathname.split('/').indexOf('p') > 0 ? true: false
+            const doesHaveP = location.pathname.split('/').indexOf('p') > 0
 
             const filterURL = currentPath.splice((doesHaveP ? 3 : 2), currentPath.length - 1)
 
@@ -283,7 +290,7 @@ exports.postAceInit = (hookName, context) => {
 
             // TODO: Check if the parent filter is there or not, then pick up the id  if there is one
 
-            const filter = {
+            let filter = {
               name: clientVars.padName,
               id: filterId,
               root: location.pathname,
@@ -311,15 +318,6 @@ exports.postAceInit = (hookName, context) => {
     }, 1000)
   }
 
-  const searchResult = _.debounce(evaluateSearchResult, 300)
-
-  $('.btn-clearInput').on('click', function () {
-    $('#heading-view').val('')
-    clearCssFilter()
-    $(this).removeClass('active')
-    $('#heading-result-msg').html('<p>Search through the headers</p>')
-    updateHeaderList()
-  })
 
   // ================>>>><<<<================== //
   // ================>>>><<<<================== //
@@ -345,25 +343,28 @@ exports.postAceInit = (hookName, context) => {
 
   const appendFilter = (filter) => {
     let active = false
+    let highlight = false
 
     if (clientVars.padId !== clientVars.padView) {
-      // active = (window.history.state && window.history.state.filter.id === filter.id) || (window.history.state.filter.prevPath === filter.path) || highliteRowList.includes(filter.path)
-      active = (window.history.state && window.history.state.filter.parentId === filter.parentId)
+      highlight = (window.history.state && window.history.state.filter.parentId === filter.parentId)
+      active = (window.history.state && window.history.state.filter.prevPath === filter.path)
       activeFilterId = window.history.state.filter.parentId
     }
-
-    console.log("activated filter Id", activeFilterId)
 
     if (!filterList.has(filter.id)) filterList.set(filter.id, filter)
 
     const newFilter = $('#filter_listItem').tmpl({
       filter: filterList.get(filter.id),
-      active
+      active,
+      highlight
     })
 
-    if ($('.section_filterList ul li').length) $('.section_filterList ul .filterEmpty').remove()
+    if ($('.section_filterList ul li').length)
+      $('.section_filterList ul .filterEmpty').remove()
 
-    if (!$(`.section_filterList ul li.row_${filter.id}`).length) $('.section_filterList ul').append(`<li class="row_${filter.id}" active="${active}">${$(newFilter).html()}</li>`)
+    if (!$(`.section_filterList ul li.row_${filter.id}`).length)
+       $('.section_filterList ul')
+        .append(`<li class="row_${filter.id}" active="${active}" highlight="${highlight}">${$(newFilter).html()}</li>`)
   }
 
   socket.on('addNewFilter', appendFilter)
@@ -427,14 +428,14 @@ exports.postAceInit = (hookName, context) => {
     }
 
     const currentPath = location.pathname.split('/')
-    const doesHaveChildren = currentPath.lastIndexOf(clientVars.padName) > 0 ? true : false
+    const doesHaveChildren = currentPath.lastIndexOf(clientVars.padName) > 0
 
     const prevPath = currentPath
     if (!doesHaveChildren) prevPath.pop()
 
     const path = `${location.pathname}/${filterUrl}`
 
-    const doesHaveP = location.pathname.split('/').indexOf('p') > 0 ? true: false
+    const doesHaveP = location.pathname.split('/').indexOf('p') > 0
 
     const filterURL = path.split('/').splice((doesHaveP ? 3 : 2), currentPath.length - 1)
 
@@ -490,21 +491,25 @@ exports.postAceInit = (hookName, context) => {
   $(document).on('click', '.btn_undoDelete', function () {
     const filterId = $(this).attr('filter-id')
     const active = $(this).attr('active')
+    const highlight = $(this).attr('highlight')
 
     clearTimeout(undoTimeList[filterId])
     delete undoTimeList[filterId]
 
     const rowFilter = $('#filter_listItem').tmpl({
       filter: filterList.get(filterId),
-      active
+      active,
+      highlight
     })
 
-    $(`.section_filterList ul li.row_${filterId}`).html(`<li class="row_${filterId}">${$(rowFilter).html()}</li>`)
+    $(`.section_filterList ul li.row_${filterId}`).html(`<li class="row_${filterId}" active="${active}" highlight="${highlight}">${$(rowFilter).html()}</li>`)
   })
 
   $(document).on('click', '.btn_filter_act[active="false"]', function () {
     const filterId = $(this).attr('filter-id')
     const filter = filterList.get(filterId)
+
+    // Object.assign(filter, {parentHSections})
 
     window.history.pushState({ filter }, filter.name, filter.path)
     window.location.href = filter.path
@@ -514,9 +519,8 @@ exports.postAceInit = (hookName, context) => {
     const filterId = $(this).attr('filter-id')
     const filter = filterList.get(filterId)
 
-    console.log(filter)
-
     if (filter) {
+      // Object.assign(filter, {parentHSections})
       window.history.pushState({ filter }, filter.name, filter.prevPath)
       window.location.href = filter.prevPath
     }
