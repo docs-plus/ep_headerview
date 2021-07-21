@@ -62,7 +62,12 @@ exports.postAceInit = (hookName, context) => {
 
       const includeParts = section.lrhMark
         .filter((x, lrnhIndex) => x && lrnhIndex <= tagIndex)
-        .map((x) => `[sectionid='${x}'],[titleid='${titleId}'][lrh${tagIndex - 1}='${section.lrhMark[tagIndex - 1]}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`)
+        .map((x) => {
+          if(tagIndex === 0)
+            return `[sectionid='${x}'],[titleid='${titleId}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`
+
+          return `[sectionid='${x}'],[titleid='${titleId}'][lrh${tagIndex - 1}='${section.lrhMark[tagIndex - 1]}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`
+        })
 
       includeSections.push(...includeParts)
     }
@@ -347,7 +352,7 @@ exports.postAceInit = (hookName, context) => {
 
     if (clientVars.padId !== clientVars.padView) {
       highlight = (window.history.state && window.history.state.filter.parentId === filter.parentId)
-      active = (window.history.state && window.history.state.filter.prevPath === filter.path)
+      active = (window.history.state && window.history.state.filter.path === filter.path)
       activeFilterId = window.history.state.filter.parentId
     }
 
