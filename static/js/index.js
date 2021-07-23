@@ -38,7 +38,7 @@ exports.postAceInit = (hookName, context) => {
   // let activeFilter
   const undoTimeList = {}
   const filterList = new Map()
-  const parentHSections =  new Set()
+  const parentHSections =  []
 
   let activeFilterId
 
@@ -49,24 +49,81 @@ exports.postAceInit = (hookName, context) => {
     .find('head')
     .append('<style id="customHeader"></style>')
 
+  let myParentId = ""
+
+  const allEqual = (arr) => new Set(arr).size == 1;
+
+  const findClosestTitleId = (val) => {
+    console.log("findClosestTitleId", val)
+    if(!val.length) return
+    const lastItem = val.pop()
+    console.log("lastItem", lastItem, "<==>" , val)
+    if(lastItem.length === 1) {
+      myParentId = lastItem[0]
+    } else if(lastItem.length > 1 && allEqual(lastItem)) {
+      myParentId = lastItem[0]
+    } else if(val.length !== 1) {
+      findClosestTitleId(val)
+    } else {
+      myParentId = val.map(x => x)
+    }
+    console.log("myParentId===>>?",myParentId)
+
+  }
+
+  const searchThroughHeaders = (val) => {
+    const regEx = new RegExp(val, 'gi')
+    const results = headerContetnts.filter((x) => x.text.match(regEx))
+    console.log("searchThroughHeaders",results, val)
+    parentHSections.push(results.map(x => x.lrh1))
+  }
+
   const appendCssFilter = () => {
     let css = ''
 
-    console.log("appendCssFilter=>>",window.history.state)
+    console.log("appendCssFilter=>>",window.history.state, filterResult)
+
+    window.history.state.filter.url.map(x => searchThroughHeaders(x))
+
+    console.log("parentHSections", parentHSections)
+
+    findClosestTitleId(parentHSections)
 
 
     for (const section of filterResult) {
       const tagIndex = section.tag
       const titleId = section.titleId
-      includeSections.push(`[sectionid='${titleId}']`)
+
+      if(section.lrh1 === myParentId)
+        includeSections.push(`[sectionid='${titleId}']`)
+
 
       const includeParts = section.lrhMark
         .filter((x, lrnhIndex) => x && lrnhIndex <= tagIndex)
         .map((x) => {
+
           if(tagIndex === 0)
             return `[sectionid='${x}'],[titleid='${titleId}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`
 
-          return `[sectionid='${x}'],[titleid='${titleId}'][lrh${tagIndex - 1}='${section.lrhMark[tagIndex - 1]}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`
+
+
+          if(myParentId) {
+
+            if( tagIndex === 2 ) {
+              return `[lrh1='${myParentId}'][sectionid='${x}'],[titleid='${titleId}'][lrh1='${myParentId}'][lrh${tagIndex - 1}='${section.lrhMark[tagIndex - 1]}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`
+            } else if( tagIndex === 3 && section.lrh1 === myParentId) {
+              console.log(myParentId,tagIndex, section)
+              return `[lrh1='${myParentId}'][sectionid='${x}'],[lrh${tagIndex - 1}='${section.lrhMark[tagIndex - 1]}'][sectionid='${x}'],[titleid='${titleId}'][lrh1='${myParentId}'][lrh${tagIndex - 1}='${section.lrhMark[tagIndex - 1]}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`
+            }
+          } else {
+            return `[sectionid='${x}'],[titleid='${titleId}'][lrh${tagIndex - 1}='${section.lrhMark[tagIndex - 1]}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`
+
+          }
+
+
+
+
+
         })
 
       includeSections.push(...includeParts)
@@ -163,7 +220,7 @@ exports.postAceInit = (hookName, context) => {
     // const activatedFilter = window.history.state === null ? null : window.history.state.filter
     // if (activatedFilter) activeFilter = activatedFilter
 
-    console.log(value, '=-=->>', typeof value)
+    console.log("evaluateSearchResult==>>",value, '=-=->>', typeof value)
 
     const val = $(value).val() || value
     if (!val || val.length <= 0) return false
@@ -191,7 +248,7 @@ exports.postAceInit = (hookName, context) => {
 
     filterResult = results
 
-    filterResult.forEach(x => parentHSections.add(x.titleId))
+    // filterResult.forEach(x => parentHSections.add(x.titleId))
 
     // const filter = window.history.state.filter
 
@@ -444,9 +501,21 @@ exports.postAceInit = (hookName, context) => {
 
     const filterURL = path.split('/').splice((doesHaveP ? 3 : 2), currentPath.length - 1)
 
-    console.log(doesHaveChildren, filterURL)
+
 
     const filterId = randomString()
+
+    const includeFilterIds = []
+
+    if(filterList.has(activeFilterId)) {
+      const activateFilter = filterList.get(activeFilterId)
+      includeFilterIds.push(...activateFilter.includeFilterIds)
+      includeFilterIds.push(filterId)
+    } else {
+      includeFilterIds.push(filterId)
+    }
+
+    console.log(doesHaveChildren, filterURL, filterList.has(activeFilterId), includeFilterIds, filterResult)
 
     const filter = {
       name: filterName,
@@ -455,8 +524,9 @@ exports.postAceInit = (hookName, context) => {
       path: `${location.pathname}/${filterUrl}`,
       prevPath: prevPath.join('/'),
       url: filterURL,
-      parentId: filterList.has(activeFilterId) ? filterList.get(activeFilterId).parentId : filterId,
-      ChildrenPath: []
+      filterResult: filterList.has(activeFilterId) ? filterList.get(activeFilterId).parentId : filterId,
+      ChildrenPath: [],
+      includeFilterIds
     }
 
     console.log(filter, filterList.get(activeFilterId))
