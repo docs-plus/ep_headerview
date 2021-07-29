@@ -58,4 +58,5 @@ exports.socketio = (hookName, args, cb) => {
       callback(filters)
     })
   })
+  return args
 }

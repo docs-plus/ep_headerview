@@ -108,13 +108,13 @@ exports.postAceInit = (hookName, context) => {
           } else {
             return `[sectionid='${x}'],[titleid='${titleId}'][lrh${tagIndex - 1}='${section.lrhMark[tagIndex - 1]}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`
           }
-          return ''
+          return undefined
         })
 
       includeSections.push(...includeParts)
     }
 
-    includeSections = includeSections.join(',')
+    includeSections = includeSections.filter(x => x && x).join(',')
 
     css = `
 
@@ -224,7 +224,7 @@ exports.postAceInit = (hookName, context) => {
 
     $('.filterNumResults').text(results.length)
 
-    if (val.length && $('#filter_name').val().length) $('#filter_url').val(slugify(val, { lower: true, strict: true }))
+    if (val.length && $('#filter_name').val().length) { $('#filter_url').val(slugify(val, { lower: true, strict: true })) }
 
     filterResult = results
 
@@ -304,16 +304,13 @@ exports.postAceInit = (hookName, context) => {
             const doesHaveChildren = currentPath.lastIndexOf(clientVars.padName) > 0
 
             const prevPath = currentPath
-            if (!doesHaveChildren) prevPath.pop()
+            if (doesHaveChildren) prevPath.pop()
 
             const doesHaveP = location.pathname.split('/').indexOf('p') > 0
 
-            const filterURL = currentPath.splice((doesHaveP ? 3 : 2), currentPath.length - 1)
+            const filterURL = [...currentPath].splice((doesHaveP ? 3 : 2), currentPath.length - 1)
 
             const filterId = randomString()
-
-            // TODO: Check if the parent filter is there or not, then pick up the id  if there is one
-            // TODO: includeFilterIds, how can I create this prop?
 
             const filter = {
               name: clientVars.padName,
@@ -322,7 +319,6 @@ exports.postAceInit = (hookName, context) => {
               path: `${location.pathname}`,
               prevPath: prevPath.join('/'),
               url: filterURL,
-              parentId: filterId,
               ChildrenPath: []
             }
 
@@ -370,9 +366,9 @@ exports.postAceInit = (hookName, context) => {
     let highlight = false
 
     if (clientVars.padId !== clientVars.padView) {
-      highlight = (window.history.state && window.history.state.filter.parentId === filter.parentId)
+      highlight = (window.history.state && window.history.state.filter.url[0] === filter.url[0])
       active = (window.history.state && window.history.state.filter.path === filter.path)
-      activeFilterId = window.history.state.filter.parentId
+      activeFilterId = window.history.state.filter.id
     }
 
     if (!filterList.has(filter.id)) filterList.set(filter.id, filter)
@@ -444,13 +440,12 @@ exports.postAceInit = (hookName, context) => {
     const filterUrl = $('#filter_url').val()
 
     const filterId = randomString()
-    const includeFilterIds = []
 
     const currentPath = location.pathname.split('/')
     const doesHaveChildren = currentPath.lastIndexOf(clientVars.padName) > 0
 
     const prevPath = currentPath
-    if (!doesHaveChildren) prevPath.pop()
+    if (doesHaveChildren) prevPath.pop()
 
     const path = `${location.pathname}/${filterUrl}`
     const doesHaveP = location.pathname.split('/').indexOf('p') > 0
@@ -463,24 +458,14 @@ exports.postAceInit = (hookName, context) => {
       return false
     }
 
-    if (filterList.has(activeFilterId)) {
-      const activateFilter = filterList.get(activeFilterId)
-      includeFilterIds.push(...activateFilter.includeFilterIds)
-      includeFilterIds.push(filterId)
-    } else {
-      includeFilterIds.push(filterId)
-    }
-
     const filter = {
       name: filterName,
       id: filterId,
       root: location.pathname,
       path: `${location.pathname}/${filterUrl}`,
       prevPath: prevPath.join('/'),
-      url: urlPrefix,
-      filterResult: filterList.has(activeFilterId) ? filterList.get(activeFilterId).parentId : filterId,
-      includeFilterIds,
-      parentId: filterList.has(activeFilterId) ? filterList.get(activeFilterId).parentId : filterId
+      url: urlPrefix
+
     }
 
     // submit filter
@@ -499,18 +484,22 @@ exports.postAceInit = (hookName, context) => {
   $(document).on('click', '.btn_filter_remove', function () {
     const filterId = $(this).attr('filter-id')
     const active = $(this).attr('active')
+    const highlight = $(this).attr('highlight')
+    const filter = filterList.get(filterId)
 
     const undoRow = $('#filter_remove_undo').tmpl({
-      filter: filterList.get(filterId),
-      active
+      filter,
+      active,
+      highlight
     })
 
     $(`.section_filterList ul li.row_${filterId}`).html(undoRow)
 
     undoTimeList[filterId] = setTimeout(() => {
       delete undoTimeList[filterId]
-      socket.emit('removeFilter', clientVars.padId, { filter: { id: filterId } }, (res) => {
-        removeFilter(filterList.get(filterId))
+      socket.emit('removeFilter', clientVars.padId, { filter }, (res) => {
+        console.info(`[headerview]: filter has been removed; id ${filterId}, res: ${res}, filter:`, filter)
+        removeFilter(filter)
       })
     }, 2000)
   })
