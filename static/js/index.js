@@ -155,10 +155,10 @@ exports.postAceInit = (hookName, context) => {
           left: 0;
           right: 0;
           background-size: 2em 100%;
-          height: 80px;
-          width: 115%;
+          height: 50px;
+          width: calc(114% + 2px);
           left: 50%;
-          transform: translate(-50%,-30px)!important;
+          transform: translate(-50%,-40px)!important;
         }
 
         // div.ace-line:not(:is(${includeSections})):after,
@@ -192,8 +192,8 @@ exports.postAceInit = (hookName, context) => {
           linear-gradient(225deg, #ddd 30%, transparent 30%);
         }
 
-        div.ace-line:not(:is(${includeSections})){ margin-top:30px; }
-        div.ace-line:not(:is(${includeSections})){ margin-bottom:30px; }
+        div.ace-line:not(:is(${includeSections})){ margin-top:40px; }
+        div.ace-line:not(:is(${includeSections})){ margin-bottom:40px; }
 
         div.ace-line:heading { color:red }
       `
