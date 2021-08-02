@@ -144,6 +144,7 @@ exports.postAceInit = (hookName, context) => {
           border: 0;
           width: 114%;
         }
+
         div.ace-line:not(:is(${includeSections})):after,
         div.ace-line:not(:is(${includeSections})):before,
         div.ace-line:not(:is(${includeSections})):after,
@@ -154,42 +155,47 @@ exports.postAceInit = (hookName, context) => {
           left: 0;
           right: 0;
           background-size: 2em 100%;
-          height: 16px;
-          width: 122%;
+          height: 80px;
+          width: 115%;
           left: 50%;
           transform: translate(-50%,-30px)!important;
         }
 
         // div.ace-line:not(:is(${includeSections})):after,
-        // div.ace-line:not(:is(${includeSections})):after{
+        // div.ace-line:not(:is(${includeSections})):before{
         //   -webkit-filter: drop-shadow(hsla(0, 0%, 80%, 0.2) 0px 0px 10px);
         // }
 
-        div.ace-line:not(:is(${includeSections})):after,
-        div.ace-line:not(:is(${includeSections})):before{
-          transform: translateY(-20px);
-        }
+        // div.ace-line:not(:is(${includeSections})):after,
+        // div.ace-line:not(:is(${includeSections})):before{
+        //   transform: translateY(-20px);
+        // }
 
-        div.ace-line:not(:is(${includeSections})):after,
         div.ace-line:not(:is(${includeSections})):after{
+          background-position: -webkit-calc(50% - -4em);
           background-image:
-          linear-gradient(135deg, hsla(210deg 20% 95%) 30%, transparent 30%),
-          linear-gradient(225deg, hsla(210deg 20% 95%) 30%, transparent 30%);
-          background-position: -webkit-calc(50% - 1em);
-          top: 0.5em;
+          linear-gradient(315deg, #fff 30%, transparent 30%),
+          linear-gradient(45deg, #fff 30%, transparent 30%);
         }
 
-        div.ace-line:not(:is(${includeSections})):before,
         div.ace-line:not(:is(${includeSections})):before{
+          background-position: -webkit-calc(50% - 1em);
           background-image:
-          linear-gradient(315deg, hsla(210deg 20% 95%) 30%, transparent 30%),
-          linear-gradient(45deg, hsla(210deg 20% 95%) 30%, transparent 30%);
-          background-position: 50%;
-          top: -0.5em;
+          linear-gradient(135deg, #fff 30%, transparent 30%),
+          linear-gradient(225deg, #fff 30%, transparent 30%);
+          background-color: #e5e7e8;
+        }
+
+        .dvd {
+          background-image:
+          linear-gradient(135deg, #ddd 30%, transparent 30%),
+          linear-gradient(225deg, #ddd 30%, transparent 30%);
         }
 
         div.ace-line:not(:is(${includeSections})){ margin-top:30px; }
         div.ace-line:not(:is(${includeSections})){ margin-bottom:30px; }
+
+        div.ace-line:heading { color:red }
       `
 
     $bodyAceOuter()
