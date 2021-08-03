@@ -156,7 +156,7 @@ exports.postAceInit = (hookName, context) => {
           right: 0;
           background-size: 2em 100%;
           height: 50px;
-          width: calc(114% + 2px);
+          width: calc(114% + 0px);
           left: 50%;
           transform: translate(-50%,-40px)!important;
         }
