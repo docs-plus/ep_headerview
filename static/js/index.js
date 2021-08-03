@@ -309,7 +309,7 @@ exports.postAceInit = (hookName, context) => {
             const currentPath = location.pathname.split('/')
             const doesHaveChildren = currentPath.lastIndexOf(clientVars.padName) > 0
 
-            const prevPath = currentPath
+            const prevPath = [...currentPath]
             if (doesHaveChildren) prevPath.pop()
 
             const doesHaveP = location.pathname.split('/').indexOf('p') > 0
@@ -452,7 +452,7 @@ exports.postAceInit = (hookName, context) => {
     const currentPath = location.pathname.split('/')
     const doesHaveChildren = currentPath.lastIndexOf(clientVars.padName) > 0
 
-    const prevPath = currentPath
+    const prevPath = [...currentPath]
     if (doesHaveChildren) prevPath.pop()
 
     const path = `${location.pathname}/${filterUrl}`
