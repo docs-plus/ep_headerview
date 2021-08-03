@@ -507,7 +507,7 @@ exports.postAceInit = (hookName, context) => {
 
     undoTimeList[filterId] = setTimeout(() => {
       delete undoTimeList[filterId]
-      socket.emit('removeFilter', clientVars.padId, { filter }, (res) => {
+      socket.emit('removeFilter', clientVars.padId,filter , (res) => {
         console.info(`[headerview]: filter has been removed; id ${filterId}, res: ${res}, filter:`, filter)
         removeFilter(filter)
       })
