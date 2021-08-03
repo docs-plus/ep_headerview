@@ -328,6 +328,8 @@ exports.postAceInit = (hookName, context) => {
               ChildrenPath: []
             }
 
+            console.log(filter)
+
             socket.emit('addNewFilter', clientVars.padId, filter, (res) => {
               if (!window.history.state) window.history.pushState({ filter }, document.title)
               evaluateSearchResult(filter.name, (result) => {
@@ -473,6 +475,8 @@ exports.postAceInit = (hookName, context) => {
       url: urlPrefix
 
     }
+
+    console.log(filter)
 
     // submit filter
     socket.emit('addNewFilter', clientVars.padId, filter, (res) => {
