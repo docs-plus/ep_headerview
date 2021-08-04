@@ -78,8 +78,10 @@ exports.postAceInit = (hookName, context) => {
   }
 
   const searchThroughHeaders = (val) => {
+    console.log(val)
     const regEx = new RegExp(val, 'gi')
     const results = headerContetnts.filter((x) => x.text.match(regEx))
+    console.log(val, regEx, results)
     parentHSections.push(results.map(x => x.lrh1))
   }
 
