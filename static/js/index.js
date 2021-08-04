@@ -450,14 +450,15 @@ exports.postAceInit = (hookName, context) => {
     const filterId = randomString()
 
     const currentPath = location.pathname.split('/')
-    const doesHaveChildren = currentPath.lastIndexOf(clientVars.padName) > 0
-
-    const prevPath = [...currentPath]
-    if (doesHaveChildren) prevPath.pop()
+    const doesHaveChildren = currentPath.lastIndexOf(clientVars.padName) < 0
 
     const path = `${location.pathname}/${filterUrl}`
     const doesHaveP = location.pathname.split('/').indexOf('p') > 0
     const urlPrefix = path.split('/').splice((doesHaveP ? 3 : 2), currentPath.length - 1)
+
+    const prevPath = path.split('/')
+    prevPath.pop()
+
 
     if (!filterName || !filterUrl) return false
 
