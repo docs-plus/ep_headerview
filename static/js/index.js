@@ -88,6 +88,8 @@ exports.postAceInit = (hookName, context) => {
     window.history.state.filter.url.map(x => searchThroughHeaders(x))
     findClosestTitleId(parentHSections)
 
+    console.log(filterResult)
+
     for (const section of filterResult) {
       const tagIndex = section.tag
       const titleId = section.titleId
