@@ -1,3 +1,30 @@
-#innerdocbody {
+#outerdocbody iframe {
+	max-width: 950px!important;
+	box-shadow: none!important;
+	background: inherit!important;
+}
+
+.inner-editor{
+	padding: 5px 0;
+}
+
+.outerdocbody{
+	position: relative;
+}
+
+#outerdocbody iframe{
+	padding: 0!important;
+}
+
+#innerdocbody{
+	width: 100%;
+	padding: 40px 55px!important;
+	max-width: 885px;
+	margin: auto;
+	box-shadow: 0 1px 3px 1px rgba(60,64,67,.15);
+	background: #fff!important;
+	overflow: inherit;
+	outline: none;
+	min-height: 700px;
   outline: 0px solid transparent;
 }
