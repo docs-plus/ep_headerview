@@ -78,10 +78,8 @@ exports.postAceInit = (hookName, context) => {
   }
 
   const searchThroughHeaders = (val) => {
-    console.log(val)
     const regEx = new RegExp(val, 'gi')
     const results = headerContetnts.filter((x) => x.text.match(regEx))
-    console.log(val, regEx, results)
     parentHSections.push(results.map(x => x.lrh1))
   }
 
@@ -89,8 +87,6 @@ exports.postAceInit = (hookName, context) => {
     let css = ''
     window.history.state.filter.url.map(x => searchThroughHeaders(x))
     findClosestTitleId(parentHSections)
-
-    console.log(filterResult)
 
     for (const section of filterResult) {
       const tagIndex = section.tag
@@ -101,18 +97,8 @@ exports.postAceInit = (hookName, context) => {
       const includeParts = section.lrhMark
         .filter((x, lrnhIndex) => x && lrnhIndex <= tagIndex)
         .map((x) => {
-          if (tagIndex === 0) { return `[sectionid='${x}'],[titleid='${titleId}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']` }
-
-          if (filterParentId) {
-            if (tagIndex === 2) {
-              return `[lrh1='${filterParentId}'][sectionid='${x}'],[titleid='${titleId}'][lrh1='${filterParentId}'][lrh${tagIndex - 1}='${section.lrhMark[tagIndex - 1]}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`
-            } else if (tagIndex === 3 && section.lrh1 === filterParentId) {
-              return `[lrh1='${filterParentId}'][sectionid='${x}'],[lrh${tagIndex - 1}='${section.lrhMark[tagIndex - 1]}'][sectionid='${x}'],[titleid='${titleId}'][lrh1='${filterParentId}'][lrh${tagIndex - 1}='${section.lrhMark[tagIndex - 1]}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`
-            }
-          } else {
-            return `[sectionid='${x}'],[titleid='${titleId}'][lrh${tagIndex - 1}='${section.lrhMark[tagIndex - 1]}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`
-          }
-          return undefined
+          if (tagIndex === 0) return `[sectionid='${x}'],[titleid='${titleId}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`
+          return `[sectionid='${x}'],[titleid='${titleId}'][lrh1='${filterParentId}'][lrh${tagIndex - 1}='${section.lrhMark[tagIndex - 1]}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`
         })
 
       includeSections.push(...includeParts)
