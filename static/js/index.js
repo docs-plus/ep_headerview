@@ -59,7 +59,14 @@ exports.postAceInit = (hookName, context) => {
 
     const filters = Array.from(filterList.values())
 
+    console.log(filters)
+
     return filters.length <= 0 ? false : filters.find(e => `/p/${clientVars.padId}/${urlPrefix.join('/')}` === e.path)
+  }
+
+  const doesFilterUrlExist = (slug) => {
+    const filters = Array.from(filterList.values())
+    return filters.length <= 0 ? false : filters.find(e => slug === e.url.join('/'))
   }
 
   const findClosestTitleId = (val) => {
@@ -449,10 +456,9 @@ exports.postAceInit = (hookName, context) => {
     const prevPath = path.split('/')
     prevPath.pop()
 
-
     if (!filterName || !filterUrl) return false
 
-    if (doesFilterExist(filterName)) {
+    if (doesFilterExist(filterName) || doesFilterUrlExist(filterUrl)) {
       console.info('[headerview]: The filter already exists')
       return false
     }
@@ -498,7 +504,7 @@ exports.postAceInit = (hookName, context) => {
 
     undoTimeList[filterId] = setTimeout(() => {
       delete undoTimeList[filterId]
-      socket.emit('removeFilter', clientVars.padId,filter , (res) => {
+      socket.emit('removeFilter', clientVars.padId, filter, (res) => {
         console.info(`[headerview]: filter has been removed; id ${filterId}, res: ${res}, filter:`, filter)
         removeFilter(filter)
       })
