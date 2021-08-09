@@ -98,7 +98,7 @@ exports.postAceInit = (hookName, context) => {
         .filter((x, lrnhIndex) => x && lrnhIndex <= tagIndex)
         .map((x) => {
           if (tagIndex === 0) return `[sectionid='${x}'],[titleid='${titleId}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`
-          return `[sectionid='${x}'],[titleid='${titleId}'][lrh1='${filterParentId}'][lrh${tagIndex - 1}='${section.lrhMark[tagIndex - 1]}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`
+          return `[sectionid='${x}'],[titleid='${titleId}'][lrh${tagIndex - 1}='${section.lrhMark[tagIndex - 1]}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`
         })
 
       includeSections.push(...includeParts)
