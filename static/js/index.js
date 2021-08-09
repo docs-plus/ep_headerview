@@ -10,6 +10,7 @@ exports.aceEditorCSS = () => {
 }
 
 exports.postAceInit = (hookName, context) => {
+  clientVars.ep_headerview = {}
   const loc = document.location
   const port = loc.port === '' ? loc.protocol === 'https:' ? 443 : 80 : loc.port
   let socketURL = `${loc.protocol}//${loc.hostname}:${port}`
@@ -59,14 +60,15 @@ exports.postAceInit = (hookName, context) => {
 
     const filters = Array.from(filterList.values())
 
-    console.log(filters)
+    const diffPass = (doesHaveP? '/p/' : '') + `${clientVars.padId}/${urlPrefix.join('/')}`
 
-    return filters.length <= 0 ? false : filters.find(e => `/p/${clientVars.padId}/${urlPrefix.join('/')}` === e.path)
+    return filters.length <= 0 ? false : filters.find(e => diffPass === e.path) ? true:false
   }
 
   const doesFilterUrlExist = (slug) => {
     const filters = Array.from(filterList.values())
-    return filters.length <= 0 ? false : filters.find(e => slug === e.url.join('/'))
+    const path = `${location.pathname}/${slug}`
+    return filters.length <= 0 ? false : filters.find(e => (path === e.path) ) ? true : false
   }
 
   const findClosestTitleId = (val) => {
@@ -210,11 +212,9 @@ exports.postAceInit = (hookName, context) => {
     const regEx = new RegExp(val, 'gi')
     const results = headerContetnts.filter((x) => x.text.match(regEx)) || []
 
-    if (val && doesFilterExist(val)) {
-      // clear form
-      $('.btn_createFilter').removeClass('active').attr('disable', true)
-      $('.filterNumResults').text(0)
-      $('input#filter_url').text('')
+    const filterURl = $("#filter_url").val()
+    if (doesFilterExist(value) && doesFilterUrlExist(filterURl)) {
+      $('.btn_createFilter').removeClass('active').attr('disabled', true)
       console.info('[headerview]: filter is exists! try andother filter name')
       return false
     }
@@ -227,7 +227,7 @@ exports.postAceInit = (hookName, context) => {
 
     $('.filterNumResults').text(results.length)
 
-    if (val.length && $('#filter_name').val().length) { $('#filter_url').val(slugify(val, { lower: true, strict: true })) }
+    // if (val.length && $('#filter_name').val().length <= 0) { $('#filter_url').val(slugify(val, { lower: true, strict: true })) }
 
     filterResult = results
 
@@ -300,6 +300,7 @@ exports.postAceInit = (hookName, context) => {
     setTimeout(() => {
       updateHeaderList((headerContetnts) => {
         socket.emit('getFilterList', clientVars.padId, (list) => {
+          clientVars.ep_headerview.filterList = list
           const filter = list.find((x) => x.path === location.pathname)
           // if filter does not exist, create a new filter
           if (!filter) {
@@ -328,13 +329,13 @@ exports.postAceInit = (hookName, context) => {
             console.log(filter)
 
             socket.emit('addNewFilter', clientVars.padId, filter, (res) => {
-              if (!window.history.state) window.history.pushState({ filter }, document.title)
+               window.history.pushState({ filter, filterList: list }, document.title)
               evaluateSearchResult(filter.name, (result) => {
                 appendCssFilter()
               })
             })
           } else {
-            if (!window.history.state) window.history.pushState({ filter }, document.title)
+             window.history.pushState({ filter, filterList: list }, document.title)
             evaluateSearchResult(filter.name, (result) => {
               appendCssFilter()
             })
@@ -374,6 +375,7 @@ exports.postAceInit = (hookName, context) => {
       highlight = (window.history.state && window.history.state.filter.url[0] === filter.url[0])
       active = (window.history.state && window.history.state.filter.path === filter.path)
       activeFilterId = window.history.state.filter.id
+      clientVars.ep_headerview.activeFilterId = window.history.state.filter.id
     }
 
     if (!filterList.has(filter.id)) filterList.set(filter.id, filter)
@@ -404,6 +406,7 @@ exports.postAceInit = (hookName, context) => {
   $('button#btn_filterView').on('click', () => {
     socket.emit('getFilterList', clientVars.padId, (list) => {
       clearFilterListSection()
+      clientVars.ep_headerview.filterList = list
       list.forEach((row) => {
         if (!filterList.has(row.id)) filterList.set(row.id, row)
         if (!row) return
@@ -425,21 +428,6 @@ exports.postAceInit = (hookName, context) => {
     updateHeaderList(null, includeSections)
   })
 
-  $('.modal_filter  input#filter_name')
-    .focusin(function () {
-      const inputText = $(this).val()
-      $('.filterNumResults').addClass('active')
-      searchResult(inputText)
-    })
-    .focusout(function () {
-      $(this).val().length === 0 && $('#filter_url').val('')
-      $('.filterNumResults').removeClass('active')
-    })
-    .keyup(function () {
-      const inputText = $(this).val()
-      searchResult(inputText)
-    })
-
   const createNewFilter = () => {
     const filterName = $('#filter_name').val()
     const filterUrl = $('#filter_url').val()
@@ -458,7 +446,7 @@ exports.postAceInit = (hookName, context) => {
 
     if (!filterName || !filterUrl) return false
 
-    if (doesFilterExist(filterName) || doesFilterUrlExist(filterUrl)) {
+    if ( doesFilterUrlExist(filterUrl)) {
       console.info('[headerview]: The filter already exists')
       return false
     }
@@ -482,9 +470,26 @@ exports.postAceInit = (hookName, context) => {
 
     // clear form
     $('#filter_name, #filter_url').val('')
-    $('.btn_createFilter').removeClass('active').attr('disable', true)
+    $('.btn_createFilter').removeClass('active').attr('disabled', true)
     $('.filterNumResults').text(0)
   }
+
+  $('.modal_filter  input#filter_name')
+  .focusin(function () {
+    const inputText = $(this).val()
+    $('.filterNumResults').addClass('active')
+    searchResult(inputText)
+  })
+  .focusout(function () {
+    const inputText = $(this).val()
+    if (inputText.length > 0) $('#filter_url').val(slugify(inputText, { lower: true, strict: true }))
+    $('.filterNumResults').removeClass('active')
+  })
+  .keyup(function () {
+    const inputText = $(this).val()
+    searchResult(inputText)
+    if (inputText.length > 0) $('#filter_url').val(slugify(inputText, { lower: true, strict: true }))
+  })
 
   $('.btn_createFilter').on('click', createNewFilter)
 
@@ -532,7 +537,7 @@ exports.postAceInit = (hookName, context) => {
   $(document).on('click', '.btn_filter_act[active="false"]', function () {
     const filterId = $(this).attr('filter-id')
     const filter = filterList.get(filterId)
-    window.history.pushState({ filter }, filter.name, filter.path)
+    window.history.pushState({ filter, filterList: Array.from(filterList.values()) }, filter.name, filter.path)
     window.location.href = filter.path
   })
 
@@ -541,7 +546,7 @@ exports.postAceInit = (hookName, context) => {
     const filter = filterList.get(filterId)
 
     if (filter) {
-      window.history.pushState({ filter }, filter.name, filter.prevPath)
+      window.history.pushState({ filter, filterList: Array.from(filterList.values()) }, filter.name, filter.prevPath)
       window.location.href = filter.prevPath
     }
   })
@@ -550,4 +555,20 @@ exports.postAceInit = (hookName, context) => {
     const val = $(this).val()
     if (val.length > 0) $(this).val(slugify(val, { lower: true, strict: true }))
   })
+  .focusin(function () {
+    $('.filterNumResults').addClass('active')
+  })
+  .focusout(function(){
+    $('.filterNumResults').removeClass('active')
+  })
+  .keyup(function () {
+    let val = $(this).val()
+    if (!doesFilterUrlExist(val)) {
+      $('.btn_createFilter').addClass('active').removeAttr('disabled')
+    }else {
+      $('.btn_createFilter').removeClass('active').attr('disabled', true)
+    }
+  })
+
+
 }
