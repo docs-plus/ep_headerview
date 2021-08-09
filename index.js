@@ -20,7 +20,7 @@ const db = require('./server/dbRepository')
 
 exports.expressCreateServer = (hookName, args, callback) => {
   args.app.get('/ep_headerview/:padId', async (req, res) => {
-    const {padId} = req.params
+    const { padId } = req.params
     let filters = await db.getFilterList(`filters:${padId}`)
       .catch((error) => {
         console.error('[headerview]: ', error)
@@ -28,8 +28,9 @@ exports.expressCreateServer = (hookName, args, callback) => {
       })
     if (!filters) filters = []
     filters = filters.filter((x) => x != null)
-    res.json({message: true, filters});
+    res.json({ message: true, filters })
   })
+  return callback()
 }
 
 exports.socketio = (hookName, args, cb) => {

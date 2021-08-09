@@ -60,15 +60,15 @@ exports.postAceInit = (hookName, context) => {
 
     const filters = Array.from(filterList.values())
 
-    const diffPass = (doesHaveP? '/p/' : '') + `${clientVars.padId}/${urlPrefix.join('/')}`
+    const diffPass = (doesHaveP ? '/p/' : '') + `${clientVars.padId}/${urlPrefix.join('/')}`
 
-    return filters.length <= 0 ? false : filters.find(e => diffPass === e.path) ? true:false
+    return filters.length <= 0 ? false : !!filters.find(e => diffPass === e.path)
   }
 
   const doesFilterUrlExist = (slug) => {
     const filters = Array.from(filterList.values())
     const path = `${location.pathname}/${slug}`
-    return filters.length <= 0 ? false : filters.find(e => (path === e.path) ) ? true : false
+    return filters.length <= 0 ? false : !!filters.find(e => (path === e.path))
   }
 
   const findClosestTitleId = (val) => {
@@ -212,7 +212,7 @@ exports.postAceInit = (hookName, context) => {
     const regEx = new RegExp(val, 'gi')
     const results = headerContetnts.filter((x) => x.text.match(regEx)) || []
 
-    const filterURl = $("#filter_url").val()
+    const filterURl = $('#filter_url').val()
     if (doesFilterExist(value) && doesFilterUrlExist(filterURl)) {
       $('.btn_createFilter').removeClass('active').attr('disabled', true)
       console.info('[headerview]: filter is exists! try andother filter name')
@@ -329,13 +329,13 @@ exports.postAceInit = (hookName, context) => {
             console.log(filter)
 
             socket.emit('addNewFilter', clientVars.padId, filter, (res) => {
-               window.history.pushState({ filter, filterList: list }, document.title)
+              window.history.pushState({ filter, filterList: list }, document.title)
               evaluateSearchResult(filter.name, (result) => {
                 appendCssFilter()
               })
             })
           } else {
-             window.history.pushState({ filter, filterList: list }, document.title)
+            window.history.pushState({ filter, filterList: list }, document.title)
             evaluateSearchResult(filter.name, (result) => {
               appendCssFilter()
             })
@@ -446,7 +446,7 @@ exports.postAceInit = (hookName, context) => {
 
     if (!filterName || !filterUrl) return false
 
-    if ( doesFilterUrlExist(filterUrl)) {
+    if (doesFilterUrlExist(filterUrl)) {
       console.info('[headerview]: The filter already exists')
       return false
     }
@@ -475,21 +475,21 @@ exports.postAceInit = (hookName, context) => {
   }
 
   $('.modal_filter  input#filter_name')
-  .focusin(function () {
-    const inputText = $(this).val()
-    $('.filterNumResults').addClass('active')
-    searchResult(inputText)
-  })
-  .focusout(function () {
-    const inputText = $(this).val()
-    if (inputText.length > 0) $('#filter_url').val(slugify(inputText, { lower: true, strict: true }))
-    $('.filterNumResults').removeClass('active')
-  })
-  .keyup(function () {
-    const inputText = $(this).val()
-    searchResult(inputText)
-    if (inputText.length > 0) $('#filter_url').val(slugify(inputText, { lower: true, strict: true }))
-  })
+    .focusin(function () {
+      const inputText = $(this).val()
+      $('.filterNumResults').addClass('active')
+      searchResult(inputText)
+    })
+    .focusout(function () {
+      const inputText = $(this).val()
+      if (inputText.length > 0) $('#filter_url').val(slugify(inputText, { lower: true, strict: true }))
+      $('.filterNumResults').removeClass('active')
+    })
+    .keyup(function () {
+      const inputText = $(this).val()
+      searchResult(inputText)
+      if (inputText.length > 0) $('#filter_url').val(slugify(inputText, { lower: true, strict: true }))
+    })
 
   $('.btn_createFilter').on('click', createNewFilter)
 
@@ -555,20 +555,18 @@ exports.postAceInit = (hookName, context) => {
     const val = $(this).val()
     if (val.length > 0) $(this).val(slugify(val, { lower: true, strict: true }))
   })
-  .focusin(function () {
-    $('.filterNumResults').addClass('active')
-  })
-  .focusout(function(){
-    $('.filterNumResults').removeClass('active')
-  })
-  .keyup(function () {
-    let val = $(this).val()
-    if (!doesFilterUrlExist(val)) {
-      $('.btn_createFilter').addClass('active').removeAttr('disabled')
-    }else {
-      $('.btn_createFilter').removeClass('active').attr('disabled', true)
-    }
-  })
-
-
+    .focusin(function () {
+      $('.filterNumResults').addClass('active')
+    })
+    .focusout(function () {
+      $('.filterNumResults').removeClass('active')
+    })
+    .keyup(function () {
+      const val = $(this).val()
+      if (!doesFilterUrlExist(val)) {
+        $('.btn_createFilter').addClass('active').removeAttr('disabled')
+      } else {
+        $('.btn_createFilter').removeClass('active').attr('disabled', true)
+      }
+    })
 }
