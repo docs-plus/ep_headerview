@@ -82,7 +82,7 @@ exports.postAceInit = (hookName, context) => {
     } else if (val.length !== 1) {
       findClosestTitleId(val)
     } else {
-      filterParentId = val.map(x => x)
+      filterParentId = val[0].map(x => x)
     }
   }
 
@@ -94,8 +94,36 @@ exports.postAceInit = (hookName, context) => {
 
   const appendCssFilter = (callback) => {
     let css = ''
-    window.history.state.filter.url.map(x => searchThroughHeaders(x))
+
+    const currentPath = location.pathname.split('/')
+    const doesHaveP = location.pathname.split('/').indexOf('p') > 0
+    const filterURL = [...currentPath].splice((doesHaveP ? 3 : 2), currentPath.length - 1)
+
+    filterURL.map(x => searchThroughHeaders(x))
     findClosestTitleId(parentHSections)
+
+    const createCssFilter = (parentId, tagIndex, titleId, section, x) => {
+      if (tagIndex === 0) { return `[sectionid='${x}'],[titleid='${titleId}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']` }
+
+      if (typeof parentId === 'string') {
+        if (tagIndex === 2) {
+          return `[lrh1='${parentId||section.lrh1}'][sectionid='${x}'],[titleid='${titleId}'][lrh1='${parentId||section.lrh1}'][lrh${tagIndex - 1}='${section.lrhMark[tagIndex - 1]}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`
+        } else if (tagIndex === 3 && section.lrh1 === parentId) {
+          return `[lrh1='${parentId||section.lrh1}'][sectionid='${x}'],[lrh${tagIndex - 1}='${section.lrhMark[tagIndex - 1]}'][sectionid='${x}'],[titleid='${titleId}'][lrh1='${parentId||section.lrh1}'][lrh${tagIndex - 1}='${section.lrhMark[tagIndex - 1]}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`
+        }
+        return `[sectionid='${x}'],[titleid='${titleId}'][lrh${tagIndex - 1}='${section.lrhMark[tagIndex - 1]}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`
+      } else {
+        if(!parentId) return
+        return [...parentId].map(parentid => {
+          if (tagIndex === 2) {
+            return `[titleid='${titleId}'][sectionid='${titleId}'],[lrh1='${parentid}'][sectionid='${x}'],[titleid='${titleId}'][lrh1='${parentid}'][lrh${tagIndex - 1}='${section.lrhMark[tagIndex - 1]}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`
+          } else if (tagIndex === 3 && section.lrh1 === parentid) {
+            return `[titleid='${titleId}'][sectionid='${titleId}'],[lrh1='${parentid}'][sectionid='${x}'],[lrh${tagIndex - 1}='${section.lrhMark[tagIndex - 1]}'][sectionid='${x}'],[titleid='${titleId}'][lrh1='${parentid}'][lrh${tagIndex - 1}='${section.lrhMark[tagIndex - 1]}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`
+          }
+          // return `[sectionid='${x}'],[titleid='${titleId}'][lrh${tagIndex - 1}='${section.lrhMark[tagIndex - 1]}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`
+        })
+      }
+    }
 
     for (const section of filterResult) {
       const tagIndex = section.tag
@@ -106,13 +134,13 @@ exports.postAceInit = (hookName, context) => {
       const includeParts = section.lrhMark
         .filter((x, lrnhIndex) => x && lrnhIndex <= tagIndex)
         .map((x) => {
-          if (tagIndex === 0) return `[sectionid='${x}'],[titleid='${titleId}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`
-          return `[sectionid='${x}'],[titleid='${titleId}'][lrh${tagIndex - 1}='${section.lrhMark[tagIndex - 1]}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`
+          return createCssFilter(filterParentId, tagIndex, titleId, section, x)
         })
 
       includeSections.push(...includeParts)
     }
 
+    console.log(includeSections)
     includeSections = includeSections.filter(x => x && x).join(',')
 
     css = `
@@ -227,8 +255,6 @@ exports.postAceInit = (hookName, context) => {
 
     $('.filterNumResults').text(results.length)
 
-    // if (val.length && $('#filter_name').val().length <= 0) { $('#filter_url').val(slugify(val, { lower: true, strict: true })) }
-
     filterResult = results
 
     if (callback) callback(results)
@@ -300,8 +326,12 @@ exports.postAceInit = (hookName, context) => {
     setTimeout(() => {
       updateHeaderList((headerContetnts) => {
         socket.emit('getFilterList', clientVars.padId, (list) => {
-          clientVars.ep_headerview.filterList = list
-          const filter = list.find((x) => x.path === location.pathname)
+          list.forEach(filter => {
+            if (!filterList.has(filter.id)) filterList.set(filter.id, filter)
+          })
+
+          const slug = location.pathname.split('/').pop()
+          const filter = list.find((x) => x.slug === slug)
           // if filter does not exist, create a new filter
           if (!filter) {
             const currentPath = location.pathname.split('/')
@@ -372,14 +402,13 @@ exports.postAceInit = (hookName, context) => {
     let highlight = false
 
     if (clientVars.padId !== clientVars.padView) {
-      highlight = (window.history.state && window.history.state.filter.url[0] === filter.url[0])
-      active = (window.history.state && window.history.state.filter.path === filter.path)
+      const activatedSlug = location.pathname.split('/')
+      highlight = activatedSlug.includes(filter.slug)
+      active = activatedSlug.includes(filter.slug)
       activeFilterId = window.history.state.filter.id
-      clientVars.ep_headerview.activeFilterId = window.history.state.filter.id
     }
 
     if (!filterList.has(filter.id)) filterList.set(filter.id, filter)
-
     const newFilter = $('#filter_listItem').tmpl({
       filter: filterList.get(filter.id),
       active,
@@ -454,11 +483,11 @@ exports.postAceInit = (hookName, context) => {
     const filter = {
       name: filterName,
       id: filterId,
+      slug: filterUrl,
       root: location.pathname,
       path: `${location.pathname}/${filterUrl}`,
       prevPath: prevPath.join('/'),
       url: urlPrefix
-
     }
 
     console.log(filter)
@@ -473,23 +502,6 @@ exports.postAceInit = (hookName, context) => {
     $('.btn_createFilter').removeClass('active').attr('disabled', true)
     $('.filterNumResults').text(0)
   }
-
-  $('.modal_filter  input#filter_name')
-    .focusin(function () {
-      const inputText = $(this).val()
-      $('.filterNumResults').addClass('active')
-      searchResult(inputText)
-    })
-    .focusout(function () {
-      const inputText = $(this).val()
-      if (inputText.length > 0) $('#filter_url').val(slugify(inputText, { lower: true, strict: true }))
-      $('.filterNumResults').removeClass('active')
-    })
-    .keyup(function () {
-      const inputText = $(this).val()
-      searchResult(inputText)
-      if (inputText.length > 0) $('#filter_url').val(slugify(inputText, { lower: true, strict: true }))
-    })
 
   $('.btn_createFilter').on('click', createNewFilter)
 
@@ -537,19 +549,46 @@ exports.postAceInit = (hookName, context) => {
   $(document).on('click', '.btn_filter_act[active="false"]', function () {
     const filterId = $(this).attr('filter-id')
     const filter = filterList.get(filterId)
-    window.history.pushState({ filter, filterList: Array.from(filterList.values()) }, filter.name, filter.path)
-    window.location.href = filter.path
+    window.history.pushState({ filter, filterList: Array.from(filterList.values()) }, filter.name)
+    const currentPath = location.pathname
+    const targetPath = `${currentPath}/${filter.slug}`
+    console.log(targetPath)
+    window.location.href = targetPath
   })
 
   $(document).on('click', '.btn_filter_act[active="true"]', function () {
     const filterId = $(this).attr('filter-id')
     const filter = filterList.get(filterId)
 
+    const currentPath = location.pathname
+    const slugIndex = currentPath.split('/').indexOf(filter.slug)
+    const newPath = currentPath.split('/')
+    newPath.splice(slugIndex, 1)
+    const targetPath = newPath.join('/')
+    console.log(targetPath)
+
     if (filter) {
-      window.history.pushState({ filter, filterList: Array.from(filterList.values()) }, filter.name, filter.prevPath)
-      window.location.href = filter.prevPath
+      window.history.pushState({ filter, filterList: Array.from(filterList.values()) }, filter.name)
+      window.location.href = targetPath
     }
   })
+
+  $('.modal_filter  input#filter_name')
+    .focusin(function () {
+      const inputText = $(this).val()
+      $('.filterNumResults').addClass('active')
+      searchResult(inputText)
+    })
+    .focusout(function () {
+      const inputText = $(this).val()
+      if (inputText.length > 0) $('#filter_url').val(slugify(inputText, { lower: true, strict: true }))
+      $('.filterNumResults').removeClass('active')
+    })
+    .keyup(function () {
+      const inputText = $(this).val()
+      searchResult(inputText)
+      if (inputText.length > 0) $('#filter_url').val(slugify(inputText, { lower: true, strict: true }))
+    })
 
   $('#filter_url').focusout(function () {
     const val = $(this).val()

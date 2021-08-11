@@ -287,7 +287,7 @@
 <script id="filter_listItem" type="text/html">
   <div active="${active}" highlight="${highlight}">
     <div class="filter_name">"${filter.name}"</div>
-    <div class="filter_url">/${filter.url.join("/")}</div>
+    <div class="filter_url">/${filter.slug}</div>
     <div>
       <button class="btn_filter_act" filter-id="${filter.id}" active="${active}">
         <svg class="deactive" style="width: 24px;" width="26" height="26" viewBox="0 0 32 32" fill="none" active="${active}"><path d="M7 17v-2h3v-3h2v3h3v2h-3v3h-2v-3H7z" fill="#5F6368"/><mask id="a" maskUnits="userSpaceOnUse" x="5" y="5" width="22" height="23"><path d="M5.5 10H16v11h-6l1 7h15.5V5.5h-21V10z" fill="#fff"/></mask><g mask="url(#a)"><path d="M25 7H7l6.968 7.273V27l4.064-4.242v-8.485L25 7z" stroke="#5F6368" stroke-width="2" stroke-linecap="round" stroke-linejoin="bevel"/></g></svg>
