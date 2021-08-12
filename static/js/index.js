@@ -72,6 +72,8 @@ exports.postAceInit = (hookName, context) => {
   }
 
   const findClosestTitleId = (val) => {
+    console.log(val, "=-=-=-=-=>>>", 'findClosestTitleId')
+    return filterParentId = val
     if (!val.length) return
     const lastItem = val.pop()
 
@@ -80,16 +82,52 @@ exports.postAceInit = (hookName, context) => {
     } else if (lastItem.length > 1 && allArryIndexIsEqual(lastItem)) {
       filterParentId = lastItem[0]
     } else if (val.length !== 1) {
+      console.log(val)
       findClosestTitleId(val)
     } else {
-      filterParentId = val[0].map(x => x)
+      filterParentId = val.map(x => x)
+      // filterParentId = result.length === 1 ? result[0]: result
     }
+
+    console.log("findClosestTitleId", filterParentId)
   }
 
-  const searchThroughHeaders = (val) => {
-    const regEx = new RegExp(val, 'gi')
+  const searchRelative = []
+  const finalSearchSections = []
+
+  const searchThroughHeaders = (val, index) => {
+    const filter = Array.from(filterList.values()).find(x => x.slug === val)
+    // console.log(filter,"kasjd9u9", val, Array.from(filterList.values()))
+    const regEx = new RegExp(filter.name, 'gi')
     const results = headerContetnts.filter((x) => x.text.match(regEx))
+    console.log(results,"=-=-haha=-=", val)
     parentHSections.push(results.map(x => x.lrh1))
+
+    searchRelative.push(results.map(x => {
+      return {titleId: x.titleId, lrh1: x.lrh1, index, section: x}
+    }))
+
+    console.log("searchRelative in searchThroughHeaders =>", searchRelative)
+
+  }
+
+
+  const normilizeSearch = (relative) => {
+    console.log("=-=normilizeSearch-=-", relative, relative.length, relative[0])
+    if(relative.length === 1) return finalSearchSections.push(...relative[0].map(x=> x.section))
+    let parent = relative.shift()
+    parent = parent.map(x => x.lrh1)
+    console.log("normilizeSearch fn =>", parent, relative, relative[0])
+    if(relative.length === 1){
+      const sdsd = relative[0].filter(x => parent.includes(x.lrh1)).map(x => x.section)
+      finalSearchSections.push(...sdsd)
+      console.log("answer", finalSearchSections)
+    } else {
+      const sdsd = relative
+      normilizeSearch(relative)
+      console.log("haHo Ha",relative, sdsd)
+    }
+
   }
 
   const appendCssFilter = (callback) => {
@@ -99,11 +137,25 @@ exports.postAceInit = (hookName, context) => {
     const doesHaveP = location.pathname.split('/').indexOf('p') > 0
     const filterURL = [...currentPath].splice((doesHaveP ? 3 : 2), currentPath.length - 1)
 
-    filterURL.map(x => searchThroughHeaders(x))
-    findClosestTitleId(parentHSections)
+    filterURL.forEach((x, index) => searchThroughHeaders(x, index))
+    // findClosestTitleId(parentHSections)
+
+    findClosestTitleId(finalSearchSections.map(x => x.lrh1 ))
+    normilizeSearch(searchRelative)
+
 
     const createCssFilter = (parentId, tagIndex, titleId, section, x) => {
+      // console.log("createCssFilter,",parentId, tagIndex, titleId, section, x , typeof parentId )
       if (tagIndex === 0) { return `[sectionid='${x}'],[titleid='${titleId}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']` }
+
+      if(parentId.length === 0){
+        if (tagIndex === 2) {
+          return `[lrh1='${section.lrh1}'][sectionid='${x}'],[titleid='${titleId}'][lrh1='${section.lrh1}'][lrh${tagIndex - 1}='${section.lrhMark[tagIndex - 1]}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`
+        } else if (tagIndex === 3) {
+          return `[lrh1='${section.lrh1}'][sectionid='${x}'],[lrh${tagIndex - 1}='${section.lrhMark[tagIndex - 1]}'][sectionid='${x}'],[titleid='${titleId}'][lrh1='${section.lrh1}'][lrh${tagIndex - 1}='${section.lrhMark[tagIndex - 1]}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`
+        }
+        return `[sectionid='${x}'],[titleid='${titleId}'][lrh${tagIndex - 1}='${section.lrhMark[tagIndex - 1]}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`
+      }
 
       if (typeof parentId === 'string') {
         if (tagIndex === 2) {
@@ -111,25 +163,31 @@ exports.postAceInit = (hookName, context) => {
         } else if (tagIndex === 3 && section.lrh1 === parentId) {
           return `[lrh1='${parentId||section.lrh1}'][sectionid='${x}'],[lrh${tagIndex - 1}='${section.lrhMark[tagIndex - 1]}'][sectionid='${x}'],[titleid='${titleId}'][lrh1='${parentId||section.lrh1}'][lrh${tagIndex - 1}='${section.lrhMark[tagIndex - 1]}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`
         }
+        console.log("yep")
         return `[sectionid='${x}'],[titleid='${titleId}'][lrh${tagIndex - 1}='${section.lrhMark[tagIndex - 1]}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`
       } else {
         if(!parentId) return
         return [...parentId].map(parentid => {
+          // console.log(parentId, "hahahaha", )
           if (tagIndex === 2) {
-            return `[titleid='${titleId}'][sectionid='${titleId}'],[lrh1='${parentid}'][sectionid='${x}'],[titleid='${titleId}'][lrh1='${parentid}'][lrh${tagIndex - 1}='${section.lrhMark[tagIndex - 1]}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`
-          } else if (tagIndex === 3 && section.lrh1 === parentid) {
+            return `[titleid='${titleId}'][sectionid='${titleId}'],[lrh1='${parentid}'][sectionid='${x}'],[titleid='${titleId}'][lrh1='${parentid}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`
+          } else if (tagIndex === 3) {
             return `[titleid='${titleId}'][sectionid='${titleId}'],[lrh1='${parentid}'][sectionid='${x}'],[lrh${tagIndex - 1}='${section.lrhMark[tagIndex - 1]}'][sectionid='${x}'],[titleid='${titleId}'][lrh1='${parentid}'][lrh${tagIndex - 1}='${section.lrhMark[tagIndex - 1]}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`
           }
-          // return `[sectionid='${x}'],[titleid='${titleId}'][lrh${tagIndex - 1}='${section.lrhMark[tagIndex - 1]}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`
+          return `[sectionid='${x}'],[titleid='${titleId}'][lrh${tagIndex - 1}='${section.lrhMark[tagIndex - 1]}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`
         })
       }
     }
 
-    for (const section of filterResult) {
+    const haha= finalSearchSections
+    console.log(haha,"33333333333333")
+
+    for (const section of finalSearchSections) {
       const tagIndex = section.tag
       const titleId = section.titleId
 
-      if (section.lrh1 === filterParentId) { includeSections.push(`[sectionid='${titleId}']`) }
+       includeSections.push(`[sectionid='${titleId}']`)
+
 
       const includeParts = section.lrhMark
         .filter((x, lrnhIndex) => x && lrnhIndex <= tagIndex)
@@ -326,6 +384,7 @@ exports.postAceInit = (hookName, context) => {
     setTimeout(() => {
       updateHeaderList((headerContetnts) => {
         socket.emit('getFilterList', clientVars.padId, (list) => {
+
           list.forEach(filter => {
             if (!filterList.has(filter.id)) filterList.set(filter.id, filter)
           })
@@ -349,6 +408,7 @@ exports.postAceInit = (hookName, context) => {
             const filter = {
               name: clientVars.padName,
               id: filterId,
+              slug: [...currentPath].pop(),
               root: location.pathname,
               path: `${location.pathname}`,
               prevPath: prevPath.join('/'),
@@ -357,6 +417,8 @@ exports.postAceInit = (hookName, context) => {
             }
 
             console.log(filter)
+
+            filterList.set(filter.id, filter)
 
             socket.emit('addNewFilter', clientVars.padId, filter, (res) => {
               window.history.pushState({ filter, filterList: list }, document.title)
