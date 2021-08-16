@@ -97,6 +97,8 @@ exports.postAceInit = (hookName, context) => {
 
   const searchFilterAND = []
 
+  const ghormeSabzi = []
+
   const searchThroughHeaders = (val, index) => {
     const filter = Array.from(filterList.values()).find(x => x.slug === val)
     // console.log(filter,"kasjd9u9", val, Array.from(filterList.values()))
@@ -106,6 +108,8 @@ exports.postAceInit = (hookName, context) => {
     parentHSections.push(results.map(x => x.lrh1))
 
     searchFilterAND.push(...results)
+
+    ghormeSabzi.push(...results)
 
     searchRelative.push(results.map(x => {
       return {titleId: x.titleId, lrh1: x.lrh1, index, section: x}
@@ -148,7 +152,7 @@ exports.postAceInit = (hookName, context) => {
 
 
     const createCssFilter = (parentId, tagIndex, titleId, section, x) => {
-      // console.log("createCssFilter,",parentId, tagIndex, titleId, section, x , typeof parentId )
+      console.log("createCssFilter,",parentId, tagIndex, titleId, section, x , typeof parentId )
       if (tagIndex === 0) { return `[sectionid='${x}'],[titleid='${titleId}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']` }
 
       if(parentId.length === 0){
@@ -182,10 +186,19 @@ exports.postAceInit = (hookName, context) => {
       }
     }
 
-    const haha= finalSearchSections
-    console.log(haha,"33333333333333", searchFilterAND)
 
-    for (const section of searchFilterAND) {
+
+    const haha= finalSearchSections
+    console.log(haha,"33333333333333", searchFilterAND, ghormeSabzi, finalSearchSections)
+
+    const newfinalSerchLRH1 = ghormeSabzi.map(x => x.lrh1)
+    const newfinalSerchLTITLEID = ghormeSabzi.map(x => x.titleId)
+
+    const findalGhormesabzi = headerContetnts.filter(x => newfinalSerchLTITLEID.includes(x.titleId) && newfinalSerchLRH1.includes(x.lrh1))
+
+    console.log("hwhwhwhwhwhwhw", findalGhormesabzi)
+
+    for (const section of findalGhormesabzi) {
       const tagIndex = section.tag
       const titleId = section.titleId
 
