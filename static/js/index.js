@@ -95,6 +95,8 @@ exports.postAceInit = (hookName, context) => {
   const searchRelative = []
   const finalSearchSections = []
 
+  const searchFilterAND = []
+
   const searchThroughHeaders = (val, index) => {
     const filter = Array.from(filterList.values()).find(x => x.slug === val)
     // console.log(filter,"kasjd9u9", val, Array.from(filterList.values()))
@@ -102,6 +104,8 @@ exports.postAceInit = (hookName, context) => {
     const results = headerContetnts.filter((x) => x.text.match(regEx))
     console.log(results,"=-=-haha=-=", val)
     parentHSections.push(results.map(x => x.lrh1))
+
+    searchFilterAND.push(...results)
 
     searchRelative.push(results.map(x => {
       return {titleId: x.titleId, lrh1: x.lrh1, index, section: x}
@@ -127,7 +131,6 @@ exports.postAceInit = (hookName, context) => {
       normilizeSearch(relative)
       console.log("haHo Ha",relative, sdsd)
     }
-
   }
 
   const appendCssFilter = (callback) => {
@@ -180,9 +183,9 @@ exports.postAceInit = (hookName, context) => {
     }
 
     const haha= finalSearchSections
-    console.log(haha,"33333333333333")
+    console.log(haha,"33333333333333", searchFilterAND)
 
-    for (const section of finalSearchSections) {
+    for (const section of searchFilterAND) {
       const tagIndex = section.tag
       const titleId = section.titleId
 
