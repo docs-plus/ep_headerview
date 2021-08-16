@@ -73,7 +73,7 @@ exports.postAceInit = (hookName, context) => {
 
   const findClosestTitleId = (val) => {
     console.log(val, "=-=-=-=-=>>>", 'findClosestTitleId')
-    return filterParentId = val
+    // return filterParentId = val
     if (!val.length) return
     const lastItem = val.pop()
 
@@ -147,7 +147,7 @@ exports.postAceInit = (hookName, context) => {
     filterURL.forEach((x, index) => searchThroughHeaders(x, index))
     // findClosestTitleId(parentHSections)
 
-    findClosestTitleId(finalSearchSections.map(x => x.lrh1 ))
+    findClosestTitleId(ghormeSabzi.map(x => x.lrh1 ))
     normilizeSearch(searchRelative)
 
 
@@ -186,6 +186,19 @@ exports.postAceInit = (hookName, context) => {
       }
     }
 
+    const createCssFilterOther = (parentId, tagIndex, titleId, section, x) => {
+      if (tagIndex === 0) { return `[sectionid='${x}'],[titleid='${titleId}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']` }
+      console.log(parentId,"=-=-=-=-", "createCssFilterOther")
+      // if(parentId.length === 0){
+        if (tagIndex === 2) {
+          return `[lrh1='${section.lrh1}'][sectionid='${x}'],[titleid='${titleId}'][lrh1='${section.lrh1}'][lrh${tagIndex - 1}='${section.lrhMark[tagIndex - 1]}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`
+        } else if (tagIndex === 3) {
+          return `[lrh1='${section.lrh1}'][sectionid='${x}'],[lrh${tagIndex - 1}='${section.lrhMark[tagIndex - 1]}'][sectionid='${x}'],[titleid='${titleId}'][lrh1='${section.lrh1}'][lrh${tagIndex - 1}='${section.lrhMark[tagIndex - 1]}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`
+        }
+        return `[sectionid='${x}'],[titleid='${titleId}'][lrh${tagIndex - 1}='${section.lrhMark[tagIndex - 1]}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`
+      // }
+    }
+
 
 
     const haha= finalSearchSections
@@ -194,11 +207,11 @@ exports.postAceInit = (hookName, context) => {
     const newfinalSerchLRH1 = ghormeSabzi.map(x => x.lrh1)
     const newfinalSerchLTITLEID = ghormeSabzi.map(x => x.titleId)
 
-    const findalGhormesabzi = headerContetnts.filter(x => newfinalSerchLTITLEID.includes(x.titleId) && newfinalSerchLRH1.includes(x.lrh1))
+    const findalGhormesabzi = headerContetnts.filter(x => newfinalSerchLRH1.includes(x.lrh1))
 
     console.log("hwhwhwhwhwhwhw", findalGhormesabzi)
 
-    for (const section of findalGhormesabzi) {
+    for (const section of finalSearchSections) {
       const tagIndex = section.tag
       const titleId = section.titleId
 
@@ -209,6 +222,7 @@ exports.postAceInit = (hookName, context) => {
         .filter((x, lrnhIndex) => x && lrnhIndex <= tagIndex)
         .map((x) => {
           return createCssFilter(filterParentId, tagIndex, titleId, section, x)
+          // return createCssFilterOther(filterParentId, tagIndex, titleId, section, x)
         })
 
       includeSections.push(...includeParts)
