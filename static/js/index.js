@@ -288,7 +288,7 @@ exports.postAceInit = (hookName, context) => {
     console.log("myresult", myresult, lastPartSeach)
 
     // for (const section of finalSearchSections) {
-    for (const section of myresult) {
+    for (const section of lastPartSeach) {
       const tagIndex = section.tag
       const titleId = section.titleId
 
