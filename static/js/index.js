@@ -307,10 +307,21 @@ exports.postAceInit = (hookName, context) => {
         console.log("first Round result ",results, "[slug]: ", slugsScore[slug].text)
       } else {
         let dobodoLrh1 = dobodo.map(x => x.lrh1)
-        let newDobod = headerContetnts.filter(x => dobodoLrh1.includes(x.lrh1))
+        let dobodoTitleId = dobodo.map(x => x.titleId)
+
+        let newDobod = headerContetnts.filter(x => dobodoTitleId.includes(x.titleId))
+
+        console.log("filterbase on titleId", newDobod)
+
+        if(!dobodoLrh1.some(x=> x === undefined))
+          newDobod = headerContetnts.filter(x => dobodoLrh1.includes(x.lrh1))
+
+        console.log("filterbase on lrh1", newDobod, dobodoLrh1.length)
+
+        console.log("dobodoLrh1", dobodoLrh1, "dobodoTitleId", dobodoTitleId)
         results = newDobod.filter((x) => x.text.match(x.text.match(regEx)) )
-        console.log("second round befor filter", newDobod)
-        console.log("second Round result", results,"dobodoLrh1", dobodoLrh1 , "[slug]: ", slugsScore[slug].text)
+        console.log("second round befor filter [newDobod]", newDobod)
+        console.log("second Round result", results,"dobodoLrh1", dobodoLrh1 , "dobodo", dobodo, "dobodoTitleId", dobodoTitleId, "[slug]: ", slugsScore[slug].text)
         finalllll.push(...results)
         // save every last slug result
         if(index >= 1) dobodo = []
@@ -360,11 +371,15 @@ exports.postAceInit = (hookName, context) => {
     }
 
     const createCssFilterForParentHeaders = (parentId, tagIndex, titleId, section, lrhSectionId) => {
+      console.log("sectionss", section)
       return `[sectionid='${lrhSectionId}'],[titleid='${titleId}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`
     }
 
     const createCssFilterForChildeHeaders  = (parentId, tagIndex, titleId, section, lrhSectionId) => {
-      return `[sectionid='${lrhSectionId}']`
+      console.log(parentId, tagIndex, titleId, section)
+
+      let results = `[sectionid='${lrhSectionId}'], [lrh${tagIndex}='${section.lrhMark[tagIndex]}'] `
+      return results
     }
 
 
@@ -375,26 +390,28 @@ exports.postAceInit = (hookName, context) => {
     const otherParentHeader = ghormeSabzi.filter(x => x.tag === 1).map(x => x.titleId)
     if(filterURL.length > 1) ghormeSabzi = ghormeSabzi.filter(x => otherParentHeader.includes(x.titleId))
 
-    const parentHeaders = ghormeSabzi.filter(x => x.tag === 1)
+    const parentHeaders = ghormeSabzi.filter(x => x.tag <= 1)
     let childeHeaders = ghormeSabzi.filter(x => x.tag > 1)
 
 
-
+    console.log("parentHeaders", parentHeaders, "childeHeaders", childeHeaders, "ghormeSabzi", ghormeSabzi, filterURL.length)
 
     // if just one filter name has activated
     if(filterURL.length === 1){
       for (const section of parentHeaders) {
         const tagIndex = section.tag
         const titleId = section.titleId
-
+        console.log("haho222",section, tagIndex)
         const includeParts = section.lrhMark
-          .filter((x, lrnhIndex) => x && (lrnhIndex) < tagIndex)
+          .filter((x, lrnhIndex) => x && (lrnhIndex) <= tagIndex)
           .map((lrhSectionId) => {
+            console.log("lrhSectionIdhw", lrhSectionId)
             return createCssFilterForParentHeaders(filterParentId, tagIndex, titleId, section, lrhSectionId)
           })
 
         includeSections.push(...includeParts)
       }
+
 
       for (const section of childeHeaders) {
         const tagIndex = section.tag
@@ -432,7 +449,6 @@ exports.postAceInit = (hookName, context) => {
       }
 
     }
-
 
 
 
