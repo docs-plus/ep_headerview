@@ -322,6 +322,10 @@ exports.postAceInit = (hookName, context) => {
         results = newDobod.filter((x) => x.text.match(x.text.match(regEx)) )
         console.log("second round befor filter [newDobod]", newDobod)
         console.log("second Round result", results,"dobodoLrh1", dobodoLrh1 , "dobodo", dobodo, "dobodoTitleId", dobodoTitleId, "[slug]: ", slugsScore[slug].text)
+        if(index === newSlugsScore.length -1){
+          console.log("yes this is the last part")
+          results = results.map(x => ({...x, lastFilter: true}))
+        }
         finalllll.push(...results)
         // save every last slug result
         if(index >= 1) dobodo = []
@@ -376,9 +380,13 @@ exports.postAceInit = (hookName, context) => {
     }
 
     const createCssFilterForChildeHeaders  = (parentId, tagIndex, titleId, section, lrhSectionId) => {
-      console.log(parentId, tagIndex, titleId, section)
-
-      let results = `[sectionid='${lrhSectionId}'], [lrh${tagIndex}='${section.lrhMark[tagIndex]}'] `
+      console.log(parentId, tagIndex, titleId, section, "<<== createCssFilterForChildeHeaders =>>", section.lastFilter)
+      let results = "";
+      if(section.lastFilter) {
+        return `[sectionid='${lrhSectionId}'],[titleid='${titleId}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`
+      } else {
+        results = `[sectionid='${lrhSectionId}']`
+      }
       return results
     }
 
@@ -646,6 +654,7 @@ exports.postAceInit = (hookName, context) => {
         tag,
         titleId,
         lrh1,
+        lastFilter: false,
         lrhMark: [
           lrh0,
           lrh1,
