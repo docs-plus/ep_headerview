@@ -2,7 +2,6 @@ const _ = require('underscore')
 const slugify = require('./slugify')
 const randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString
 const $bodyAceOuter = () => $(document).find('iframe[name="ace_outer"]').contents()
-const allArryIndexIsEqual = (arr) => new Set(arr).size === 1
 
 exports.aceEditorCSS = () => {
   const version = clientVars.headerView.version || 1
@@ -32,14 +31,11 @@ exports.postAceInit = (hookName, context) => {
   /** ========================= **/
 
   let headerContetnts = []
-  let filterResult = []
   let includeSections = []
   const htags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']
   const undoTimeList = {}
   const filterList = new Map()
-  const parentHSections = []
-  let filterParentId = ''
-  let activeFilterId
+  let filteredHeaders = []
 
   // append custom style element to the pad inner.
   $bodyAceOuter()
@@ -71,398 +67,135 @@ exports.postAceInit = (hookName, context) => {
     return filters.length <= 0 ? false : !!filters.find(e => (path === e.path))
   }
 
-  const findClosestTitleId = (val) => {
-    // console.log(val, "=-=-=-=-=>>>", 'findClosestTitleId')
-    // return filterParentId = val
-    if (!val.length) return
-    const lastItem = val.pop()
-
-    if (lastItem.length === 1) {
-      filterParentId = lastItem[0]
-    } else if (lastItem.length > 1 && allArryIndexIsEqual(lastItem)) {
-      filterParentId = lastItem[0]
-    } else if (val.length !== 1) {
-      // console.log(val)
-      findClosestTitleId(val)
-    } else {
-      filterParentId = val.map(x => x)
-      // filterParentId = result.length === 1 ? result[0]: result
-    }
-
-    // console.log("findClosestTitleId", filterParentId)
+  const createCssFilterForParentHeaders = (tagIndex, titleId, section, lrhSectionId) => {
+    return `[sectionid='${lrhSectionId}'],[titleid='${titleId}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`
   }
 
-  const searchRelative = []
-  const finalSearchSections = []
-  const searchFilterAND = []
-  let ghormeSabzi = []
-
-  let searchRound = [];
-
-  const searchThroughHeaders = (val, index) => {
-
-
-
-
-
-    const filter = Array.from(filterList.values()).find(x => x.slug === val)
-
-    // console.log(filter, "[==-=-=-")
-
-    // console.log(filter,"kasjd9u9", val, Array.from(filterList.values()))
-    const regEx = new RegExp(filter.name, 'gi')
-
-    const results = headerContetnts.filter((x) => x.text.match(regEx))
-
-
-
-
-
-
-
-
-
-
-    //** new concept */
-
-
-   /**=====>>>>>> */
-    const roundLRH1 = results.map(x => x.lrh1)
-
-    // console.log(results)
-    // searchRound.push(...includeSearch)
-
-    if(!searchRound){
-      const includeSearch = headerContetnts.filter(x => roundLRH1.includes(x.lrh1))
-      searchRound = includeSearch
-      // console.log("round one", [...includeSearch])
+  const createCssFilterForChildeHeaders = (tagIndex, titleId, section, lrhSectionId) => {
+    let results = ''
+    if (section.lastFilter) {
+      results = `[sectionid='${lrhSectionId}'],[titleid='${titleId}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`
     } else {
-      const includeSearch = searchRound.filter(x => roundLRH1.includes(x.lrh1))
-      searchRound = includeSearch
-      // console.log("round two", [...searchRound])
+      results = `[sectionid='${lrhSectionId}']`
     }
-
-    // console.log("incudesearction", searchRound)
-
-
-    // console.log(results,"=-=-haha=-=", val)
-    parentHSections.push(results.map(x => x.lrh1))
-
-    searchFilterAND.push(...results)
-
-    if(ghormeSabzi.length<=0){
-      // console.log("im inininin")
-      ghormeSabzi.push(...results)
-    } else {
-      const lrhIds = ghormeSabzi.map(x => x.lrh1)
-      const s = results.filter(x=> {
-        // console.log(`lrhIds.includes(x.lrh1) = ${lrhIds[lrhIds.indexOf(x.lrh1)]}, ${x.lrh1} => ${lrhIds.includes(x.lrh1)}`, lrhIds)
-        return lrhIds.includes(x.lrh1)
-      })
-      // console.log("hahah", lrhIds, s, "<<=-=-=>>")
-      ghormeSabzi.push(...results)
-    }
-
-    // console.log("ghormeSabzi 1, 2", [...ghormeSabzi], ghormeSabzi.length)
-
-    if(searchRelative.length<=0){
-      searchRelative.push(results.map(x => {
-        return {titleId: x.titleId, lrh1: x.lrh1, index, section: x}
-      }))
-    } else {
-      const lrhIds = searchRelative[0].map(x => x.lrh1)
-      // console.log("hwhwhwwhwh1112", lrhIds, searchRelative )
-      const s = results.filter(x=> {
-        return lrhIds.includes(x.lrh1)
-      })
-      // console.log("hahah", lrhIds, s, "<<=-=-=>>", searchRelative)
-      searchRelative.push(s.map(x => {
-        return {titleId: x.titleId, lrh1: x.lrh1, index, section: x}
-      }))
-    }
-
-    // searchRelative.push(results.map(x => {
-    //   return {titleId: x.titleId, lrh1: x.lrh1, index, section: x}
-    // }))
-
-    // console.log("searchRelative in searchThroughHeaders =>", searchRelative)
-
+    return results
   }
-
-
-  const normilizeSearch = (relative) => {
-    // console.log("=-=normilizeSearch-=-", relative, relative.length, relative[0])
-    if(relative.length === 1) return finalSearchSections.push(...relative[0].map(x=> x.section))
-    let parent = relative.shift()
-    parent = parent.map(x => x.lrh1)
-    // console.log("normilizeSearch fn =>", parent, relative, relative[0])
-    if(relative.length === 1){
-      const sdsd = relative[0].filter(x => parent.includes(x.lrh1)).map(x => x.section)
-      finalSearchSections.push(...sdsd)
-      // console.log("answer", finalSearchSections)
-    } else {
-      const sdsd = relative
-      normilizeSearch(relative)
-      // console.log("haHo Ha",relative, sdsd)
-    }
-  }
-
-  const myresult = []
-  const lastPartSeach = []
-  const normilizingHaHa = (slug, index, filterURL) => {
-    // console.log(slug,"normilizingHaHa=>><<<>><><><><><><")
-    // const slug = filterURL[filterURL.length  - 1]
-    const filter = Array.from(filterList.values()).find(x => x.slug === slug)
-
-    const regEx = new RegExp(filter.name, 'gi')
-
-    const results = searchRound.filter((x) => x.text.match(regEx))
-    // console.log(slug,"normilizingHaHa=>><<<>><><><><><><", results, "searchroudn", searchRound, "ghormeSabzi", ghormeSabzi)
-
-    myresult.push(...results)
-
-    if(filterURL.length -1 === index){
-      lastPartSeach.push(...results)
-    }
-
-    return searchRound
-  }
-
-
-
-  const newSerch = () => {
-    const filter = Array.from(filterList.values()).find(x => x.slug === val)
-
-    console.log(filter, "[==-=-=-")
-
-    // console.log(filter,"kasjd9u9", val, Array.from(filterList.values()))
-    const regEx = new RegExp(filter.name, 'gi')
-
-    const results = headerContetnts.filter((x) => x.text.match(regEx))
-
-  }
-
 
   const appendCssFilter = (callback) => {
     let css = ''
+    let bucketSearchResult = []
+    const filterIncludesSections = []
+    const slugsScore = {}
+    const sectionsContaintSlugs = []
 
     const currentPath = location.pathname.split('/')
     const doesHaveP = location.pathname.split('/').indexOf('p') > 0
     const filterURL = [...currentPath].splice((doesHaveP ? 3 : 2), currentPath.length - 1)
 
-
-    filterURL.forEach((x, index) => searchThroughHeaders(x, index))
-    // findClosestTitleId(parentHSections)
-
-    // findClosestTitleId(ghormeSabzi.map(x => x.lrh1 ))
-    normilizeSearch(searchRelative)
-
-    // normilizingHaHa(filterURL)
-    filterURL.forEach((x, index) => normilizingHaHa(x, index, filterURL))
-
-    let dobodo = []
-    const finalllll = []
-
-    const sectionsContaintSlugs = []
-    let slugsScore = {}
-
+    // Give score to the slugs and reorder the filter for nested search
     filterURL.forEach((slug, index) => {
       const filter = Array.from(filterList.values()).find(x => x.slug === slug)
       const regEx = new RegExp(filter.name, 'gi')
-      let results = []
 
-      //===========>>>>>>>>
-      if(!slugsScore[slug]) slugsScore[slug] = {text: filter.name,count: 0, sumTagIndex: 0, score: 0}
+      if (!slugsScore[slug]) slugsScore[slug] = { text: filter.name, count: 0, sumTagIndex: 0, score: 0 }
+      // TODO: [performance-issue]: change this loop cycle
       const sectionsSlugs = headerContetnts.filter((x) => {
         const is = x.text.match(regEx)
-        if(is) {
+        if (is) {
           slugsScore[slug].count += 1
           slugsScore[slug].sumTagIndex += x.tag
         }
         return is
       })
       sectionsContaintSlugs.push(...sectionsSlugs)
-      //===========>>>>>>>>
-
     })
 
+    const slugsScoreKeys = Object.keys(slugsScore)
 
-    Object.keys(slugsScore).forEach(x => {
-      const count = slugsScore[x].count
-      const sumTagIndex = slugsScore[x].sumTagIndex
-      slugsScore[x].score = sumTagIndex / count
+    // Calculate the slug score
+    slugsScoreKeys.forEach(slug => {
+      const count = slugsScore[slug].count
+      const sumTagIndex = slugsScore[slug].sumTagIndex
+      slugsScore[slug].score = sumTagIndex / count
     })
 
+    // sort slug by score
+    const sortedSlugs = slugsScoreKeys.sort((a, b) => slugsScore[a].score - slugsScore[b].score)
 
-    const newSlugsScore = Object.keys(slugsScore).sort(function(a,b){return slugsScore[a].score-slugsScore[b].score})
-
-    console.log("slugsScore",slugsScore, "newSlugsScore", newSlugsScore, filterParentId)
-
-    for (const [index, slug] of newSlugsScore.entries()) {
+    for (const [index, slug] of sortedSlugs.entries()) {
       const regEx = new RegExp(slugsScore[slug].text, 'gi')
       let results = []
 
-      if(dobodo.length === 0){
+      if (bucketSearchResult.length === 0) {
         results = headerContetnts.filter((x) => x.text.match(regEx))
-        console.log("first Round result ",results, "[slug]: ", slugsScore[slug].text)
+        filteredHeaders.push(...results)
       } else {
-        let dobodoLrh1 = dobodo.map(x => x.lrh1)
-        let dobodoTitleId = dobodo.map(x => x.titleId)
+        const lrh1IdList = bucketSearchResult.map(x => x.lrh1)
+        const titleIdList = bucketSearchResult.map(x => x.titleId)
 
-        let newDobod = headerContetnts.filter(x => dobodoTitleId.includes(x.titleId))
+        let newBucketSearchResult = headerContetnts.filter(x => titleIdList.includes(x.titleId))
 
-        console.log("filterbase on titleId", newDobod)
+        if (!lrh1IdList.some(x => x === undefined)) { newBucketSearchResult = headerContetnts.filter(x => lrh1IdList.includes(x.lrh1)) }
 
-        if(!dobodoLrh1.some(x=> x === undefined))
-          newDobod = headerContetnts.filter(x => dobodoLrh1.includes(x.lrh1))
+        results = newBucketSearchResult.filter((x) => x.text.match(x.text.match(regEx)))
+        filteredHeaders.push(...results)
 
-        console.log("filterbase on lrh1", newDobod, dobodoLrh1.length)
+        if (index === sortedSlugs.length - 1) { results = results.map(x => ({ ...x, lastFilter: true })) }
 
-        console.log("dobodoLrh1", dobodoLrh1, "dobodoTitleId", dobodoTitleId)
-        results = newDobod.filter((x) => x.text.match(x.text.match(regEx)) )
-        console.log("second round befor filter [newDobod]", newDobod)
-        console.log("second Round result", results,"dobodoLrh1", dobodoLrh1 , "dobodo", dobodo, "dobodoTitleId", dobodoTitleId, "[slug]: ", slugsScore[slug].text)
-        if(index === newSlugsScore.length -1){
-          console.log("yes this is the last part")
-          results = results.map(x => ({...x, lastFilter: true}))
-        }
-        finalllll.push(...results)
+        filterIncludesSections.push(...results)
         // save every last slug result
-        if(index >= 1) dobodo = []
+        if (index >= 1) bucketSearchResult = []
       }
 
-      dobodo.push(...results)
-
+      bucketSearchResult.push(...results)
     }
-
-      console.log("sectionsContaintSlugs", sectionsContaintSlugs, "slugsScore", slugsScore)
-      console.log("dobodo", dobodo, "final results", finalllll)
-
-
-    const createCssFilter = (parentId, tagIndex, titleId, section, x) => {
-      // console.log("createCssFilter,",parentId, tagIndex, titleId, section, x , typeof parentId )
-      if (tagIndex === 0) { return `[sectionid='${x}'],[titleid='${titleId}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']` }
-
-      // return `[sectionid='${x}'],[titleid='${titleId}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`
-
-      // if (typeof parentId === 'string' || (typeof parentId === "object" && parentId.length)) {
-        // if(typeof parentId === "object") parentId = parentId[0]
-        if (tagIndex === 2) {
-          return `[lrh1='${section.lrh1}'][sectionid='${x}'],[titleid='${titleId}'][lrh${tagIndex - 1}='${section.lrhMark[tagIndex - 1]}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}'][lrh${tagIndex+1}='${section.lrhMark[tagIndex]+1}']`
-        } else if (tagIndex === 3 && section.lrh1 === parentId) {
-          return `[lrh1='${section.lrh1}'][sectionid='${x}'],[lrh${tagIndex - 1}='${section.lrhMark[tagIndex - 1]}'][sectionid='${x}'],[titleid='${titleId}'][lrh${tagIndex - 1}='${section.lrhMark[tagIndex - 1]}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}'][lrh${tagIndex+1}='${section.lrhMark[tagIndex]+1}']`
-        }
-        // console.log("yep")
-        return `[sectionid='${x}'],[titleid='${titleId}'][lrh${tagIndex - 1}='${section.lrhMark[tagIndex - 1]}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}'][lrh${tagIndex+1}='${section.lrhMark[tagIndex]+1}']`
-      // }
-      // else {
-      //   if(!parentId) return
-      //   return [...parentId].map(parentid => {
-      //     // console.log(parentId, "hahahaha", )
-      //     if (tagIndex === 2) {
-      //       return `[titleid='${titleId}'][sectionid='${titleId}'],[lrh1='${parentid}'][sectionid='${x}'],[titleid='${titleId}'][lrh1='${parentid}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`
-      //     } else if (tagIndex === 3) {
-      //       return `[titleid='${titleId}'][sectionid='${titleId}'],[lrh1='${parentid}'][sectionid='${x}'],[lrh${tagIndex - 1}='${section.lrhMark[tagIndex - 1]}'][sectionid='${x}'],[titleid='${titleId}'][lrh1='${parentid}'][lrh${tagIndex - 1}='${section.lrhMark[tagIndex - 1]}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`
-      //     }
-      //     return `[sectionid='${x}'],[titleid='${titleId}'][lrh${tagIndex - 1}='${section.lrhMark[tagIndex - 1]}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`
-      //   })
-      // }
-    }
-
-
-    const createCssFilterOther = (parentId, tagIndex, titleId, section, x, parentHeaders) => {
-      return `[sectionid='${x}']`
-    }
-
-    const createCssFilterForParentHeaders = (parentId, tagIndex, titleId, section, lrhSectionId) => {
-      console.log("sectionss", section)
-      return `[sectionid='${lrhSectionId}'],[titleid='${titleId}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`
-    }
-
-    const createCssFilterForChildeHeaders  = (parentId, tagIndex, titleId, section, lrhSectionId) => {
-      console.log(parentId, tagIndex, titleId, section, "<<== createCssFilterForChildeHeaders =>>", section.lastFilter)
-      let results = "";
-      if(section.lastFilter) {
-        return `[sectionid='${lrhSectionId}'],[titleid='${titleId}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`
-      } else {
-        results = `[sectionid='${lrhSectionId}']`
-      }
-      return results
-    }
-
-
-
 
     // filter by parent // limite the search result by title header Id
     // I want this line
-    const otherParentHeader = ghormeSabzi.filter(x => x.tag === 1).map(x => x.titleId)
-    if(filterURL.length > 1) ghormeSabzi = ghormeSabzi.filter(x => otherParentHeader.includes(x.titleId))
-
-    const parentHeaders = ghormeSabzi.filter(x => x.tag <= 1)
-    let childeHeaders = ghormeSabzi.filter(x => x.tag > 1)
-
-
-    console.log("parentHeaders", parentHeaders, "childeHeaders", childeHeaders, "ghormeSabzi", ghormeSabzi, filterURL.length)
+    const otherParentHeader = filteredHeaders.filter(x => x.tag === 1).map(x => x.titleId)
+    if (filterURL.length > 1) filteredHeaders = filteredHeaders.filter(x => otherParentHeader.includes(x.titleId))
 
     // if just one filter name has activated
-    if(filterURL.length === 1){
-      for (const section of parentHeaders) {
+    if (filterURL.length === 1) {
+      for (const section of filteredHeaders) {
         const tagIndex = section.tag
         const titleId = section.titleId
-        console.log("haho222",section, tagIndex)
         const includeParts = section.lrhMark
           .filter((x, lrnhIndex) => x && (lrnhIndex) <= tagIndex)
           .map((lrhSectionId) => {
-            console.log("lrhSectionIdhw", lrhSectionId)
-            return createCssFilterForParentHeaders(filterParentId, tagIndex, titleId, section, lrhSectionId)
+            return createCssFilterForParentHeaders(tagIndex, titleId, section, lrhSectionId)
           })
 
         includeSections.push(...includeParts)
       }
 
-
-      for (const section of childeHeaders) {
+      for (const section of filteredHeaders) {
         const tagIndex = section.tag
         const titleId = section.titleId
 
         const includeParts = section.lrhMark
           .filter((x, lrnhIndex) => x && (lrnhIndex) <= tagIndex)
           .map((lrhSectionId) => {
-            return createCssFilterForChildeHeaders(filterParentId, tagIndex, titleId, section, lrhSectionId)
+            return createCssFilterForChildeHeaders(tagIndex, titleId, section, lrhSectionId)
           })
 
         includeSections.push(...includeParts)
       }
-
-
     } else {
-      const parentHeaderslrh1Id  = parentHeaders.map(x => x.lrh1)
-
-      // if(parentHeaderslrh1Id.length)
-      childeHeaders = childeHeaders.filter(x => parentHeaderslrh1Id.includes(x.lrh1))
-
-      console.log("childeHeaders", childeHeaders, "parentHeaders",parentHeaders, "finalllll", finalllll)
-
-      for (const section of finalllll) {
+      for (const section of filterIncludesSections) {
         const tagIndex = section.tag
         const titleId = section.titleId
 
         const includeParts = section.lrhMark
           .filter((x, lrnhIndex) => x && (lrnhIndex) <= tagIndex)
           .map((lrhSectionId) => {
-            return createCssFilterForChildeHeaders(filterParentId, tagIndex, titleId, section, lrhSectionId)
+            return createCssFilterForChildeHeaders(tagIndex, titleId, section, lrhSectionId)
           })
 
         includeSections.push(...includeParts)
       }
-
     }
 
-
-
-
-
-    console.log("includes filtest array =>", includeSections)
     includeSections = includeSections.filter(x => x && x).join(',')
 
     css = `
@@ -557,40 +290,6 @@ exports.postAceInit = (hookName, context) => {
   }
 
   const evaluateSearchResult = (value, callback) => {
-
-    const currentPath = location.pathname.split('/')
-    const doesHaveP = location.pathname.split('/').indexOf('p') > 0
-    const filterURL = [...currentPath].splice((doesHaveP ? 3 : 2), currentPath.length - 1)
-
-
-    // ======>>>>new logic
-    // setTimeout(() => {
-    //   const myFilters = Array.from(filterList.values())
-    //   console.log("new logic => [filterURL]=", filterURL, "[headerContents]=", headerContetnts)
-
-    //   const options = {
-    //     includeScore: true,
-    //     // includeMatches: true,
-    //     // findAllMatches: true,
-    //     useExtendedSearch: true,
-    //     // Search in `author` and in `tags` array
-    //     keys: ['text']
-    //   }
-
-    //   const fuse = new Fuse(headerContetnts, options)
-
-    //   const filterSerchName = filterURL[0]
-
-    //   const result = fuse.search(filterSerchName)
-    //   console.log("new logic result",filterSerchName,result)
-    // }, 500);
-    // ======>>>>new logic
-
-
-
-
-
-
     const val = value
     if (!val || val.length <= 0) return false
     const regEx = new RegExp(val, 'gi')
@@ -610,8 +309,6 @@ exports.postAceInit = (hookName, context) => {
     }
 
     $('.filterNumResults').text(results.length)
-
-    filterResult = results
 
     if (callback) callback(results)
   }
@@ -683,7 +380,6 @@ exports.postAceInit = (hookName, context) => {
     setTimeout(() => {
       updateHeaderList((headerContetnts) => {
         socket.emit('getFilterList', clientVars.padId, (list) => {
-
           list.forEach(filter => {
             if (!filterList.has(filter.id)) filterList.set(filter.id, filter)
           })
@@ -714,8 +410,6 @@ exports.postAceInit = (hookName, context) => {
               url: filterURL,
               ChildrenPath: []
             }
-
-            console.log(filter)
 
             filterList.set(filter.id, filter)
 
@@ -766,7 +460,6 @@ exports.postAceInit = (hookName, context) => {
       const activatedSlug = location.pathname.split('/')
       highlight = activatedSlug.includes(filter.slug)
       active = activatedSlug.includes(filter.slug)
-      activeFilterId = window.history.state.filter.id
     }
 
     if (!filterList.has(filter.id)) filterList.set(filter.id, filter)
@@ -825,7 +518,6 @@ exports.postAceInit = (hookName, context) => {
     const filterId = randomString()
 
     const currentPath = location.pathname.split('/')
-    const doesHaveChildren = currentPath.lastIndexOf(clientVars.padName) < 0
 
     const path = `${location.pathname}/${filterUrl}`
     const doesHaveP = location.pathname.split('/').indexOf('p') > 0
@@ -850,8 +542,6 @@ exports.postAceInit = (hookName, context) => {
       prevPath: prevPath.join('/'),
       url: urlPrefix
     }
-
-    console.log(filter)
 
     // submit filter
     socket.emit('addNewFilter', clientVars.padId, filter, (res) => {
@@ -913,7 +603,6 @@ exports.postAceInit = (hookName, context) => {
     window.history.pushState({ filter, filterList: Array.from(filterList.values()) }, filter.name)
     const currentPath = location.pathname
     const targetPath = `${currentPath}/${filter.slug}`
-    console.log(targetPath)
     window.location.href = targetPath
   })
 
@@ -926,7 +615,6 @@ exports.postAceInit = (hookName, context) => {
     const newPath = currentPath.split('/')
     newPath.splice(slugIndex, 1)
     const targetPath = newPath.join('/')
-    console.log(targetPath)
 
     if (filter) {
       window.history.pushState({ filter, filterList: Array.from(filterList.values()) }, filter.name)
