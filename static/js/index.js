@@ -254,14 +254,14 @@ exports.postAceInit = (hookName, context) => {
         // }
 
         div.ace-line:not(:is(${includeSections})):after{
-          background-position: -webkit-calc(50% - -4em);
+          background-position: calc(50% - -4em);
           background-image:
           linear-gradient(315deg, #fff 30%, transparent 30%),
           linear-gradient(45deg, #fff 30%, transparent 30%);
         }
 
         div.ace-line:not(:is(${includeSections})):before{
-          background-position: -webkit-calc(50% - 1em);
+          background-position: calc(50% - 1em);
           background-image:
           linear-gradient(135deg, #fff 30%, transparent 30%),
           linear-gradient(225deg, #fff 30%, transparent 30%);
