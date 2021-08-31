@@ -37,6 +37,9 @@ exports.postAceInit = (hookName, context) => {
   const filterList = new Map()
   let filteredHeaders = []
 
+  $(document)
+    .find('head')
+    .append('<style id="tocCustomHeader"></style>')
   // append custom style element to the pad inner.
   $bodyAceOuter()
     .find('iframe')
@@ -79,6 +82,20 @@ exports.postAceInit = (hookName, context) => {
       results = `[sectionid='${lrhSectionId}']`
     }
     return results
+  }
+
+  const epTableOfContentsPlugin = (includeSections) => {
+    const plugins = clientVars.plugins.plugins || {}
+    if (!plugins.hasOwnProperty('ep_table_of_contents')) return false
+    const css = `
+      #tocItems .tocItem{
+        display: none
+      }
+      #tocItems .tocItem:is(${includeSections}) {
+        display: block
+      }
+    `
+    $(document).find('head #tocCustomHeader').html(css)
   }
 
   const appendCssFilter = (callback) => {
@@ -285,6 +302,9 @@ exports.postAceInit = (hookName, context) => {
       .contents()
       .find('head #customHeader')
       .html(css)
+
+    // if ep_table_of_contents is avilabel filter the list of headers also
+    epTableOfContentsPlugin(includeSections)
 
     if (callback) callback()
   }
