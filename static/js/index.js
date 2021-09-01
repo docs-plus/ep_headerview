@@ -263,10 +263,10 @@ exports.postAceInit = (hookName, context) => {
     if (!plugins.hasOwnProperty('ep_table_of_contents')) return false
     const css = `
       #tocItems .tocItem{
-        display: none
+        display: none;
       }
       #tocItems .tocItem:is(${includeSections}) {
-        display: block
+        display: flex;
       }
     `
     $(document).find('head #tocCustomHeader').html(css)
