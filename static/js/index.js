@@ -29,7 +29,6 @@ const createNewFilter = () => {
   const filterId = randomString()
 
   const currentPath = location.pathname.split('/')
-
   const path = `${location.pathname}/${filterUrl}`
   const doesHaveP = location.pathname.split('/').indexOf('p') > 0
   const urlPrefix = path.split('/').splice((doesHaveP ? 3 : 2), currentPath.length - 1)
@@ -504,6 +503,8 @@ exports.postAceInit = (hookName, context) => {
             const doesHaveP = location.pathname.split('/').indexOf('p') > 0
 
             const filterURL = [...currentPath].splice((doesHaveP ? 3 : 2), currentPath.length - 1)
+
+            if(filterURL.length === 0) return false
 
             const filterId = randomString()
 
