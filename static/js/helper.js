@@ -2,7 +2,7 @@ const _ = require('underscore')
 const slugify = require('./slugify')
 const {
   headerContetnts,
-  filterList,
+  filterList
 
 } = require('./store')
 const $bodyAceOuter = () => $(document).find('iframe[name="ace_outer"]').contents()
@@ -159,6 +159,8 @@ const updateHeaderList = (callback, selectedSections = []) => {
 
 const searchResult = _.debounce(evaluateSearchResult, 200)
 
+const doesHaveP = () => location.pathname.split('/').indexOf('p') > 0
+
 module.exports = {
   removeFilter,
   appendFilter,
@@ -167,5 +169,6 @@ module.exports = {
   doesFilterUrlExist,
   evaluateSearchResult,
   searchResult,
-  updateHeaderList
+  updateHeaderList,
+  doesHaveP
 }

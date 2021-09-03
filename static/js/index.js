@@ -28,10 +28,14 @@ const createNewFilter = () => {
 
   const filterId = randomString()
 
-  const currentPath = location.pathname.split('/')
+  let currentPath = location.pathname.split('/')
+  // integration with pads like democracy
+  if (currentPath[(Helper.doesHaveP() ? 2 : 1)] !== clientVars.padId) {
+    currentPath = [Helper.doesHaveP() ? 'p' : '', clientVars.padId]
+  }
+
   const path = `${location.pathname}/${filterUrl}`
-  const doesHaveP = location.pathname.split('/').indexOf('p') > 0
-  const urlPrefix = path.split('/').splice((doesHaveP ? 3 : 2), currentPath.length - 1)
+  const urlPrefix = path.split('/').splice((Helper.doesHaveP() ? 3 : 2), currentPath.length - 1)
 
   const prevPath = path.split('/')
   prevPath.pop()
@@ -52,6 +56,8 @@ const createNewFilter = () => {
     prevPath: prevPath.join('/'),
     url: urlPrefix
   }
+
+  console.info('[headerview]: create filter: ', filter)
 
   // submit filter
   socket.emit('addNewFilter', clientVars.padId, filter, (res) => {
@@ -179,7 +185,13 @@ const eventListner = () => {
     const filterId = $(this).attr('filter-id')
     const filter = filterList.get(filterId)
     window.history.pushState({ filter, filterList: Array.from(filterList.values()) }, filter.name)
-    const currentPath = location.pathname
+    let currentPath = location.pathname
+    // integration with pads like democracy
+    if (currentPath[(Helper.doesHaveP() ? 2 : 1)] !== clientVars.padId) {
+      currentPath = [Helper.doesHaveP() ? 'p' : '', `${clientVars.padId}`]
+      Helper.doesHaveP() ? currentPath.unshift('') : ''
+      currentPath = currentPath.join('/')
+    }
     const targetPath = `${currentPath}/${filter.slug}`
     window.location.href = targetPath
   })
@@ -187,13 +199,12 @@ const eventListner = () => {
   $(document).on('click', '.btn_filter_act[active="true"]', function () {
     const filterId = $(this).attr('filter-id')
     const filter = filterList.get(filterId)
-
     const currentPath = location.pathname
     const slugIndex = currentPath.split('/').indexOf(filter.slug)
     const newPath = currentPath.split('/')
     newPath.splice(slugIndex, 1)
-    const targetPath = newPath.join('/')
-
+    let targetPath = newPath.join('/')
+    if (targetPath.length === 0) targetPath = '/'
     if (filter) {
       window.history.pushState({ filter, filterList: Array.from(filterList.values()) }, filter.name)
       window.location.href = targetPath
@@ -278,9 +289,13 @@ exports.postAceInit = (hookName, context) => {
     const slugsScore = {}
     const sectionsContaintSlugs = []
 
-    const currentPath = location.pathname.split('/')
-    const doesHaveP = location.pathname.split('/').indexOf('p') > 0
-    const filterURL = [...currentPath].splice((doesHaveP ? 3 : 2), currentPath.length - 1)
+    let currentPath = location.pathname.split('/')
+    // integration with pads like democracy
+    if (currentPath[(Helper.doesHaveP() ? 2 : 1)] !== clientVars.padId) {
+      currentPath = [Helper.doesHaveP() ? 'p' : '', clientVars.padId]
+    }
+
+    const filterURL = [...currentPath].splice((Helper.doesHaveP() ? 3 : 2), currentPath.length - 1)
 
     // Give score to the slugs and reorder the filter for nested search
     filterURL.forEach((slug, index) => {
@@ -494,17 +509,21 @@ exports.postAceInit = (hookName, context) => {
           const filter = list.find((x) => x.slug === slug)
           // if filter does not exist, create a new filter
           if (!filter) {
-            const currentPath = location.pathname.split('/')
-            const doesHaveChildren = currentPath.lastIndexOf(clientVars.padName) > 0
+            let currentPath = location.pathname.split('/')
+            // integration with pads like democracy
+            if (currentPath[(Helper.doesHaveP() ? 2 : 1)] !== clientVars.padId) {
+              currentPath = [Helper.doesHaveP() ? 'p' : '', clientVars.padId]
+            }
 
+            const doesHaveChildren = currentPath.lastIndexOf(clientVars.padName) > 0
             const prevPath = [...currentPath]
             if (doesHaveChildren) prevPath.pop()
 
-            const doesHaveP = location.pathname.split('/').indexOf('p') > 0
+            const filterURL = [...currentPath].splice((Helper.doesHaveP() ? 3 : 2), currentPath.length - 1)
 
-            const filterURL = [...currentPath].splice((doesHaveP ? 3 : 2), currentPath.length - 1)
+            console.log(filterURL, (Helper.doesHaveP() ? 3 : 2), '=-=-=-0-0-0', currentPath, Helper.doesHaveP(), doesHaveChildren, currentPath.length - 1)
 
-            if(filterURL.length === 0) return false
+            if (filterURL.length === 0) return false
 
             const filterId = randomString()
 
@@ -518,6 +537,8 @@ exports.postAceInit = (hookName, context) => {
               url: filterURL,
               ChildrenPath: []
             }
+
+            console.info('[headerview]: create filter: ', filter)
 
             filterList.set(filter.id, filter)
 
