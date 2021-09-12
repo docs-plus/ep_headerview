@@ -186,14 +186,10 @@ const eventListner = () => {
     const filterId = $(this).attr('filter-id')
     const filter = filterList.get(filterId)
     window.history.pushState({ filter, filterList: Array.from(filterList.values()) }, filter.name)
-    let currentPath = location.pathname
-    // integration with pads like democracy
-    if (currentPath[(Helper.doesHaveP() ? 2 : 1)] !== clientVars.padId) {
-      currentPath = [Helper.doesHaveP() ? 'p' : '', `${clientVars.padId}`]
-      Helper.doesHaveP() ? currentPath.unshift('') : ''
-      currentPath = currentPath.join('/')
-    }
-    const targetPath = `${currentPath}/${filter.slug}`
+    const currentPath = location.pathname.split('/')
+    currentPath.push(filter.slug)
+    if (currentPath[0] === '' && currentPath[1] === '') currentPath.shift()
+    const targetPath = currentPath.join('/')
     window.location.href = targetPath
   })
 
@@ -290,21 +286,23 @@ exports.postAceInit = (hookName, context) => {
     const slugsScore = {}
     const sectionsContaintSlugs = []
 
-    let currentPath = location.pathname.split('/')
-    // integration with pads like democracy
-    if (currentPath[(Helper.doesHaveP() ? 2 : 1)] !== clientVars.padId) {
-      currentPath = [Helper.doesHaveP() ? 'p' : '', clientVars.padId]
-    }
-
+    const currentPath = location.pathname.split('/')
     let filterURL = [...currentPath].splice((Helper.doesHaveP() ? 3 : 2), currentPath.length - 1)
+
+    console.info('[headerview]: filterURL', filterURL, clientVars.ep_singlePad.active)
 
     if (clientVars.ep_singlePad.active) {
       filterURL = location.pathname.split('/')
-      // remove empty index item
-      filterURL.shift()
+      const doesUrlHavePadId = filterURL.indexOf(clientVars.padId) >= 0
+
+      // /p/padName/slug = ["", "p","padName","slug"] OR /padName/slug = ["", "padName", slug]
+      if (Helper.doesHaveP() || doesUrlHavePadId) { filterURL = [...currentPath].splice((Helper.doesHaveP() ? 3 : 2), currentPath.length - 1) } else filterURL.shift() // /slug = ["", "slug"]
+
+      // in development mode
+      if (doesUrlHavePadId) filterURL = filterURL.filter(x => x !== clientVars.padId)
     }
 
-    // console.info(`[headerview]: filterURL`, filterURL)
+    console.info('[headerview]: filterURL', filterURL, filterURL.indexOf(clientVars.padId))
 
     // Give score to the slugs and reorder the filter for nested search
     filterURL.forEach((slug, index) => {
@@ -539,8 +537,6 @@ exports.postAceInit = (hookName, context) => {
             if (doesHaveChildren) prevPath.pop()
 
             const filterURL = [...currentPath].splice((Helper.doesHaveP() ? 3 : 2), currentPath.length - 1)
-
-            console.log(filterURL, (Helper.doesHaveP() ? 3 : 2), '=-=-=-0-0-0', currentPath, Helper.doesHaveP(), doesHaveChildren, currentPath.length - 1)
 
             if (filterURL.length === 0) return false
 
