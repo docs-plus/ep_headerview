@@ -28,11 +28,12 @@ const createNewFilter = () => {
 
   const filterId = randomString()
 
-  let currentPath = location.pathname.split('/')
-  // integration with pads like democracy
-  if (currentPath[(Helper.doesHaveP() ? 2 : 1)] !== clientVars.padId) {
-    currentPath = [Helper.doesHaveP() ? 'p' : '', clientVars.padId]
-  }
+  const currentPath = location.pathname.split('/')
+
+  // // integration with pads like democracy
+  // if (currentPath[(Helper.doesHaveP() ? 2 : 1)] !== clientVars.padId) {
+  //   currentPath = [Helper.doesHaveP() ? 'p' : '', clientVars.padId]
+  // }
 
   const path = `${location.pathname}/${filterUrl}`
   const urlPrefix = path.split('/').splice((Helper.doesHaveP() ? 3 : 2), currentPath.length - 1)
@@ -295,7 +296,15 @@ exports.postAceInit = (hookName, context) => {
       currentPath = [Helper.doesHaveP() ? 'p' : '', clientVars.padId]
     }
 
-    const filterURL = [...currentPath].splice((Helper.doesHaveP() ? 3 : 2), currentPath.length - 1)
+    let filterURL = [...currentPath].splice((Helper.doesHaveP() ? 3 : 2), currentPath.length - 1)
+
+    if (clientVars.ep_singlePad.active) {
+      filterURL = location.pathname.split('/')
+      // remove empty index item
+      filterURL.shift()
+    }
+
+    // console.info(`[headerview]: filterURL`, filterURL)
 
     // Give score to the slugs and reorder the filter for nested search
     filterURL.forEach((slug, index) => {
@@ -315,6 +324,8 @@ exports.postAceInit = (hookName, context) => {
       sectionsContaintSlugs.push(...sectionsSlugs)
     })
 
+    // console.info(`[headerview]: sectionsContaintSlugs,`, sectionsContaintSlugs)
+
     const slugsScoreKeys = Object.keys(slugsScore)
 
     // Calculate the slug score
@@ -324,8 +335,12 @@ exports.postAceInit = (hookName, context) => {
       slugsScore[slug].score = sumTagIndex / count
     })
 
+    // console.info(`[headerview]: slugsScore`, slugsScore)
+
     // sort slug by score
     const sortedSlugs = slugsScoreKeys.sort((a, b) => slugsScore[a].score - slugsScore[b].score)
+
+    // console.info(`[headerview]: sortedSlugs`, sortedSlugs)
 
     for (const [index, slug] of sortedSlugs.entries()) {
       const regEx = new RegExp(slugsScore[slug].text, 'gi')
@@ -354,6 +369,8 @@ exports.postAceInit = (hookName, context) => {
 
       bucketSearchResult.push(...results)
     }
+
+    // console.info(`[headerview]: filteredHeaders,`, filteredHeaders)
 
     // filter by parent // limite the search result by title header Id
     // I want this line
@@ -402,6 +419,8 @@ exports.postAceInit = (hookName, context) => {
     }
 
     const cssSectionSelecrots = includeSections.filter(x => x && x).join(',')
+
+    // console.info(`[headerview]: cssSectionSelecrots,`, cssSectionSelecrots)
 
     css = `
 
