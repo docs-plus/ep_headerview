@@ -27,17 +27,9 @@ const createNewFilter = () => {
   const filterUrl = $('#filter_url').val()
 
   const filterId = randomString()
-
   const currentPath = location.pathname.split('/')
-
-  // // integration with pads like democracy
-  // if (currentPath[(Helper.doesHaveP() ? 2 : 1)] !== clientVars.padId) {
-  //   currentPath = [Helper.doesHaveP() ? 'p' : '', clientVars.padId]
-  // }
-
   const path = `${location.pathname}/${filterUrl}`
   const urlPrefix = path.split('/').splice((Helper.doesHaveP() ? 3 : 2), currentPath.length - 1)
-
   const prevPath = path.split('/')
   prevPath.pop()
 
@@ -526,31 +518,23 @@ exports.postAceInit = (hookName, context) => {
           const filter = list.find((x) => x.slug === slug)
           // if filter does not exist, create a new filter
           if (!filter) {
-            let currentPath = location.pathname.split('/')
-            // integration with pads like democracy
-            if (currentPath[(Helper.doesHaveP() ? 2 : 1)] !== clientVars.padId) {
-              currentPath = [Helper.doesHaveP() ? 'p' : '', clientVars.padId]
-            }
-
-            const doesHaveChildren = currentPath.lastIndexOf(clientVars.padName) > 0
-            const prevPath = [...currentPath]
-            if (doesHaveChildren) prevPath.pop()
-
-            const filterURL = [...currentPath].splice((Helper.doesHaveP() ? 3 : 2), currentPath.length - 1)
-
-            if (filterURL.length === 0) return false
-
             const filterId = randomString()
+            const currentPath = location.pathname.split('/')
+            const path = location.pathname
+            const urlPrefix = path.split('/').splice((Helper.doesHaveP() ? 3 : 2), currentPath.length - 1)
+            const prevPath = path.split('/')
+            prevPath.pop()
+
+            if (urlPrefix.length === 0) return false
 
             const filter = {
               name: clientVars.padName,
               id: filterId,
-              slug: [...currentPath].pop(),
+              slug: slugify([...currentPath].pop()),
               root: location.pathname,
               path: `${location.pathname}`,
               prevPath: prevPath.join('/'),
-              url: filterURL,
-              ChildrenPath: []
+              url: urlPrefix
             }
 
             console.info('[headerview]: create filter: ', filter)
