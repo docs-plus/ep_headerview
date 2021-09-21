@@ -37,7 +37,12 @@ const appendFilter = (filter) => {
 
   if ($('.section_filterList ul li').length) { $('.section_filterList ul .filterEmpty').remove() }
 
-  if (!$(`.section_filterList ul li.row_${filter.id}`).length) {
+  if ($(`.section_filterList ul li.row_${filter.id}`).length) return false
+
+  if (active || highlight) {
+    $('.section_filterList ul')
+      .prepend(`<li class="row_${filter.id}" active="${active}" highlight="${highlight}">${$(newFilter).html()}</li>`)
+  } else {
     $('.section_filterList ul')
       .append(`<li class="row_${filter.id}" active="${active}" highlight="${highlight}">${$(newFilter).html()}</li>`)
   }
