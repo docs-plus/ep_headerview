@@ -109,8 +109,7 @@ const eventListner = () => {
   $('.btn_createFilter').on('click', createNewFilter)
 
   $('button#btn_filterView').on('click', () => {
-
-  $(".section_filterList .loader").show()
+    $('.section_filterList .loader').show()
 
     socket.emit('getFilterList', clientVars.padId, (list) => {
       clearFilterListSection()
@@ -121,8 +120,7 @@ const eventListner = () => {
         Helper.appendFilter(row)
       })
 
-    $(".section_filterList .loader").hide()
-
+      $('.section_filterList .loader').hide()
     })
   })
 
@@ -287,7 +285,7 @@ exports.postAceInit = (hookName, context) => {
     const currentPath = location.pathname.split('/')
     let filterURL = [...currentPath].splice((Helper.doesHaveP() ? 3 : 2), currentPath.length - 1)
 
-    console.info('[headerview]: filterURL', filterURL, clientVars.ep_singlePad.active)
+    console.info('[headerview]: filterURL', filterURL)
 
     if (clientVars.ep_singlePad.active) {
       filterURL = location.pathname.split('/')
