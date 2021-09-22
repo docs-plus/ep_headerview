@@ -110,6 +110,7 @@ const eventListner = () => {
 
   $('button#btn_filterView').on('click', () => {
     $('.section_filterList .loader').show()
+    $('.section_filterList ul').hide()
 
     socket.emit('getFilterList', clientVars.padId, (list) => {
       clearFilterListSection()
@@ -119,7 +120,7 @@ const eventListner = () => {
         if (!row) return
         Helper.appendFilter(row)
       })
-
+      $('.section_filterList ul').show()
       $('.section_filterList .loader').hide()
     })
   })
