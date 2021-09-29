@@ -1,24 +1,39 @@
 {
   "name": "ep_headerview",
   "description": "Another docsplus plugin, filter sections",
-  "version": "0.12.5",
+  "version": "0.12.6",
   "scripts": {
-    "lint": "standard --fix"
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix ."
   },
   "author": {
     "name": "Hossein Marzban",
     "email": "marzban98@gmail.com"
   },
   "devDependencies": {
-    "standard": "^16.0.3"
+    "eslint": "^7.32.0",
+    "eslint-config-etherpad": "^2.0.0",
+    "eslint-plugin-eslint-comments": "^3.2.0",
+    "eslint-plugin-mocha": "^9.0.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prefer-arrow": "^1.2.3",
+    "eslint-plugin-promise": "^5.1.0",
+    "eslint-plugin-you-dont-need-lodash-underscore": "^6.12.0"
+  },
+  "eslintConfig": {
+    "root": true,
+    "extends": "etherpad/plugin"
+  },
+  "engines": {
+    "node": ">=10.13.0"
   },
   "standard": {
     "env": {
-     "browser": true,
-     "node": true,
-     "amd": true,
-     "jquery": true,
-     "es6": true
+      "browser": true,
+      "node": true,
+      "amd": true,
+      "jquery": true,
+      "es6": true
     },
     "globals": [
       "clientVars",
@@ -27,6 +42,9 @@
     "ignore": [
       "/static/js/slugify.js"
     ]
+  },
+  "peerDependencies": {
+    "ep_etherpad-lite": ">=1.8.14"
   },
   "dependencies": {
     "slugify": "^1.5.3",

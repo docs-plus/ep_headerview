@@ -355,7 +355,9 @@ exports.postAceInit = (hookName, context) => {
         results = newBucketSearchResult.filter((x) => x.text.match(x.text.match(regEx)))
         filteredHeaders.push(...results)
 
-        if (index === sortedSlugs.length - 1) { results = results.map(x => ({ ...x, lastFilter: true })) }
+        if (index === sortedSlugs.length - 1) {
+          results = results.map(x => ({ ...x, lastFilter: true }))
+        }
 
         filterIncludesSections.push(...results)
         // save every last slug result
