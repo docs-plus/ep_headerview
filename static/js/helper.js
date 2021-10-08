@@ -170,6 +170,16 @@ const searchResult = _.debounce(evaluateSearchResult, 200);
 
 const doesHaveP = () => location.pathname.split('/').indexOf('p') > 0;
 
+const innerSkeleton = (action) => {
+  const aceInner = $('iframe[name="ace_outer"]').contents()
+      .find('iframe[name="ace_inner"]').contents().find('body');
+  if (action === 'show') {
+    aceInner.find('#innerSkeleton').show();
+  } else {
+    aceInner.find('#innerSkeleton').hide();
+  }
+};
+
 module.exports = {
   removeFilter,
   appendFilter,
@@ -180,4 +190,5 @@ module.exports = {
   searchResult,
   updateHeaderList,
   doesHaveP,
+  innerSkeleton,
 };

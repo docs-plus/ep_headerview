@@ -248,6 +248,23 @@ exports.postAceInit = (hookName, context) => {
   appendCustomStyleTag()
   eventListner()
 
+  const innerSkeleton = $('iframe[name="ace_outer"]').contents()
+    .find('iframe[name="ace_inner"]').contents().find('body');
+
+    innerSkeleton.append(`<div id="innerSkeleton"></div>`)
+
+    for(i=0; i<3; i++) {
+      innerSkeleton.find('#innerSkeleton').append(`
+          <div class="paragraph">
+            <div class="line header"></div>
+            <div class="line medium"></div>
+            <div class="line large"></div>
+            <div class="line large"></div>
+            <div class="line small"></div>
+          </div>
+      `);
+    }
+
   const createCssFilterForParentHeaders = (tagIndex, titleId, section, lrhSectionId) => {
     return `[sectionid='${lrhSectionId}'],[titleid='${titleId}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`
   }
@@ -282,6 +299,7 @@ exports.postAceInit = (hookName, context) => {
     const filterIncludesSections = []
     const slugsScore = {}
     const sectionsContaintSlugs = []
+
 
     const currentPath = location.pathname.split('/')
     let filterURL = [...currentPath].splice((Helper.doesHaveP() ? 3 : 2), currentPath.length - 1)
@@ -510,10 +528,16 @@ exports.postAceInit = (hookName, context) => {
     // if ep_table_of_contents is avilabel filter the list of headers also
     epTableOfContentsPlugin(cssSectionSelecrots)
 
+    Helper.innerSkeleton("hide")
+
     if (callback) callback()
   }
 
+
+
   if (clientVars.padId !== clientVars.padView) {
+    Helper.innerSkeleton("show");
+
     setTimeout(() => {
       Helper.updateHeaderList((headerContetnts) => {
         socket.emit('getFilterList', clientVars.padId, (list) => {
@@ -548,6 +572,8 @@ exports.postAceInit = (hookName, context) => {
 
             filterList.set(filter.id, filter)
 
+
+
             socket.emit('addNewFilter', clientVars.padId, filter, (res) => {
               window.history.pushState({ filter, filterList: list }, document.title)
               Helper.evaluateSearchResult(filter.name, (result) => {
@@ -563,5 +589,6 @@ exports.postAceInit = (hookName, context) => {
         })
       })
     }, 1000)
+
   }
 }
