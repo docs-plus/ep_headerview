@@ -3,6 +3,12 @@
 const eejs = require('ep_etherpad-lite/node/eejs/');
 const packageJson = require('./package.json');
 
+exports.eejsBlock_styles = (hook_name, args, cb) =>{
+  args.content = args.content + "<link href='../static/plugins/ep_headerview/static/css/editor.css' rel='stylesheet'>";
+  return {};
+}
+
+
 exports.eejsBlock_editbarMenuRight = (hookName, args, cb) => {
   args.content += eejs.require('ep_headerview/templates/editbarButtons.ejs');
   return cb();

@@ -173,7 +173,7 @@ const doesHaveP = () => location.pathname.split("/").indexOf("p") > 0;
 
 const innerSkeleton = (action) => {
   const innerSkeletonHtml = `
-  <div id="innerSkeleton">
+  <div id="editorSkeleton">
     <div class="paragraph">
       <div class="line header"></div>
       <div class="line medium"></div>
@@ -198,18 +198,20 @@ const innerSkeleton = (action) => {
   </div>
 `;
 
-  const aceInner = $('iframe[name="ace_outer"]')
-    .contents()
-    .find('iframe[name="ace_inner"]')
-    .contents()
-    .find("body");
+  // const aceInner = $('iframe[name="ace_outer"]')
+  //   .contents()
+  //   .find('iframe[name="ace_inner"]')
+  //   .contents()
+  //   .find("body");
 
-  if (action === "append" && !aceInner.find("#innerSkeleton").length) {
+  const aceInner = $('#editorcontainer')
+
+  if (action === "append" && !aceInner.find("#editorSkeleton").length) {
     aceInner.append(innerSkeletonHtml);
   } else if (action === "show") {
-    aceInner.find("#innerSkeleton").show();
+    aceInner.find("#editorSkeleton").show();
   } else {
-    aceInner.find("#innerSkeleton").remove();
+    aceInner.find("#editorSkeleton").remove();
   }
 };
 
