@@ -250,8 +250,7 @@ exports.postAceInit = (hookName, context) => {
   appendCustomStyleTag()
   eventListner()
 
-
-
+  Helper.innerSkeleton("append");
 
   const createCssFilterForParentHeaders = (tagIndex, titleId, section, lrhSectionId) => {
     return `[sectionid='${lrhSectionId}'],[titleid='${titleId}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`
@@ -576,7 +575,9 @@ exports.postAceInit = (hookName, context) => {
           }
         })
       })
-    }, 1000)
+    }, 1000);
 
+  } else {
+    Helper.innerSkeleton("hide");
   }
 }

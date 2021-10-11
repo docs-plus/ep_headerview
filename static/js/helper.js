@@ -203,8 +203,11 @@ const innerSkeleton = (action) => {
     .find('iframe[name="ace_inner"]')
     .contents()
     .find("body");
-  if (action === "show") {
+
+  if (action === "append" && !aceInner.find("#innerSkeleton").length) {
     aceInner.append(innerSkeletonHtml);
+  } else if (action === "show") {
+    aceInner.find("#innerSkeleton").show();
   } else {
     aceInner.find("#innerSkeleton").remove();
   }
