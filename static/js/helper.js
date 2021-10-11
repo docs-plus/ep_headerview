@@ -198,12 +198,6 @@ const innerSkeleton = (action) => {
   </div>
 `;
 
-  // const aceInner = $('iframe[name="ace_outer"]')
-  //   .contents()
-  //   .find('iframe[name="ace_inner"]')
-  //   .contents()
-  //   .find("body");
-
   const aceInner = $('#editorcontainer')
 
   if (action === "append" && !aceInner.find("#editorSkeleton").length) {
@@ -211,7 +205,7 @@ const innerSkeleton = (action) => {
   } else if (action === "show") {
     aceInner.find("#editorSkeleton").show();
   } else {
-    aceInner.find("#editorSkeleton").remove();
+    aceInner.find("#editorSkeleton").hide();
   }
 };
 
