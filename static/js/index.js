@@ -242,28 +242,16 @@ const eventListner = () => {
     })
 }
 
+
+
 exports.postAceInit = (hookName, context) => {
   clientVars.ep_headerview = {}
   initSocket()
   appendCustomStyleTag()
   eventListner()
 
-  const innerSkeleton = $('iframe[name="ace_outer"]').contents()
-    .find('iframe[name="ace_inner"]').contents().find('body');
 
-    innerSkeleton.append(`<div id="innerSkeleton"></div>`)
 
-    for(i=0; i<3; i++) {
-      innerSkeleton.find('#innerSkeleton').append(`
-          <div class="paragraph">
-            <div class="line header"></div>
-            <div class="line medium"></div>
-            <div class="line large"></div>
-            <div class="line large"></div>
-            <div class="line small"></div>
-          </div>
-      `);
-    }
 
   const createCssFilterForParentHeaders = (tagIndex, titleId, section, lrhSectionId) => {
     return `[sectionid='${lrhSectionId}'],[titleid='${titleId}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`
