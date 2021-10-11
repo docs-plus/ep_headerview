@@ -204,7 +204,7 @@ const innerSkeleton = (action) => {
     .contents()
     .find("body");
   if (action === "show") {
-    aceInner.appernd(innerSkeletonHtml);
+    aceInner.append(innerSkeletonHtml);
   } else {
     aceInner.find("#innerSkeleton").remove();
   }
