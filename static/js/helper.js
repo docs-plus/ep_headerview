@@ -173,39 +173,41 @@ const doesHaveP = () => location.pathname.split("/").indexOf("p") > 0;
 
 const innerSkeleton = (action) => {
   const innerSkeletonHtml = `
-  <div id="editorSkeleton">
-    <div class="paragraph">
-      <div class="line header"></div>
-      <div class="line medium"></div>
-      <div class="line large"></div>
-      <div class="line large"></div>
-      <div class="line small"></div>
-    </div>
-    <div class="paragraph">
-      <div class="line header"></div>
-      <div class="line medium"></div>
-      <div class="line large"></div>
-      <div class="line large"></div>
-      <div class="line small"></div>
-    </div>
-    <div class="paragraph">
-      <div class="line header"></div>
-      <div class="line medium"></div>
-      <div class="line large"></div>
-      <div class="line large"></div>
-      <div class="line small"></div>
+  <div id="editorSkeletonWrapper">
+    <div id="editorSkeleton">
+      <div class="paragraph">
+        <div class="line header"></div>
+        <div class="line medium"></div>
+        <div class="line large"></div>
+        <div class="line large"></div>
+        <div class="line small"></div>
+      </div>
+      <div class="paragraph">
+        <div class="line header"></div>
+        <div class="line medium"></div>
+        <div class="line large"></div>
+        <div class="line large"></div>
+        <div class="line small"></div>
+      </div>
+      <div class="paragraph">
+        <div class="line header"></div>
+        <div class="line medium"></div>
+        <div class="line large"></div>
+        <div class="line large"></div>
+        <div class="line small"></div>
+      </div>
     </div>
   </div>
 `;
 
   const aceInner = $('#editorcontainer')
 
-  if (action === "append" && !aceInner.find("#editorSkeleton").length) {
+  if (action === "append" && !aceInner.find("#editorSkeletonWrapper").length) {
     aceInner.append(innerSkeletonHtml);
   } else if (action === "show") {
-    aceInner.find("#editorSkeleton").show();
+    aceInner.find("#editorSkeletonWrapper").show();
   } else {
-    aceInner.find("#editorSkeleton").hide();
+    aceInner.find("#editorSkeletonWrapper").hide();
   }
 };
 

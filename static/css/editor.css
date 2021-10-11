@@ -6,22 +6,30 @@ div.ace-line{
   position: relative;
 }
 
+#editorSkeletonWrapper{
+  position: absolute;
+  width: calc(100% - 6px);
+  height: 100%;
+  background-color: #f8f9fa;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  align-content: center;
+}
+
 #editorSkeleton {
   margin: auto;
-  max-width: 890px;
+  max-width: 910px;
   width: 100%;
   height: 100%;
   background: #fff;
   display: block;
   padding: 20px;
   box-shadow: 0 1px 3px 1px rgb(60 64 67 / 15%);
-  border-radius: 3px;
-  margin-top: 26px;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-
+  border-radius: 4px;
+  margin-top: 24px;
 }
 
 #editorSkeleton .paragraph {
