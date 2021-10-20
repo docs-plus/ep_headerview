@@ -190,16 +190,16 @@
     background-color: #eee;
   }
 
-  .section_filterList ul li button.btn_filter_act svg.active{
+  .section_filterList ul li button.btn_filter_act svg{
     display: none;
   }
 
-  .section_filterList ul li button.btn_filter_act svg[active="true"].active {
+  .section_filterList ul li button.btn_filter_act[active="true"] svg.active {
     display: block;
   }
 
-  .section_filterList ul li button.btn_filter_act svg[active="true"].deactive {
-    display: none;
+  .section_filterList ul li button.btn_filter_act[active="false"] svg.deactive {
+    display: block;
   }
 
   .section_filterList ul li .filter_url {

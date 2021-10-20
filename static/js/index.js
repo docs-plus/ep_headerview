@@ -179,31 +179,8 @@ const eventListner = () => {
       .html(`<li class="row_${filterId}" active="${active}" highlight="${highlight}">${$(rowFilter).html()}</li>`)
   })
 
-  $(document).on('click', '.btn_filter_act[active="false"]', function () {
-    const filterId = $(this).attr('filter-id')
-    const filter = filterList.get(filterId)
-    window.history.pushState({ filter, filterList: Array.from(filterList.values()) }, filter.name)
-    const currentPath = location.pathname.split('/')
-    currentPath.push(filter.slug)
-    if (currentPath[0] === '' && currentPath[1] === '') currentPath.shift()
-    const targetPath = currentPath.join('/')
-    window.location.href = targetPath
-  })
 
-  $(document).on('click', '.btn_filter_act[active="true"]', function () {
-    const filterId = $(this).attr('filter-id')
-    const filter = filterList.get(filterId)
-    const currentPath = location.pathname
-    const slugIndex = currentPath.split('/').indexOf(filter.slug)
-    const newPath = currentPath.split('/')
-    newPath.splice(slugIndex, 1)
-    let targetPath = newPath.join('/')
-    if (targetPath.length === 0) targetPath = '/'
-    if (filter) {
-      window.history.pushState({ filter, filterList: Array.from(filterList.values()) }, filter.name)
-      window.location.href = targetPath
-    }
-  })
+
 
   $('.modal_filter  input#filter_name')
     .focusin(function () {
@@ -287,7 +264,6 @@ exports.postAceInit = (hookName, context) => {
     const slugsScore = {}
     const sectionsContaintSlugs = []
 
-
     const currentPath = location.pathname.split('/')
     let filterURL = [...currentPath].splice((Helper.doesHaveP() ? 3 : 2), currentPath.length - 1)
 
@@ -305,6 +281,21 @@ exports.postAceInit = (hookName, context) => {
     }
 
     console.info('[headerview]: filterURL', filterURL, filterURL.indexOf(clientVars.padId))
+
+    if(filterURL.length === 0){
+      // clear css filter
+      $bodyAceOuter()
+        .find('iframe')
+        .contents()
+        .find('head #customHeader')
+        .html("");
+
+      $(document).find('head #tocCustomHeader').html(css)
+
+      Helper.innerSkeleton("hide");
+
+      return true;
+    }
 
     // Give score to the slugs and reorder the filter for nested search
     filterURL.forEach((slug, index) => {
@@ -513,12 +504,65 @@ exports.postAceInit = (hookName, context) => {
       .html(css)
 
     // if ep_table_of_contents is avilabel filter the list of headers also
-    epTableOfContentsPlugin(cssSectionSelecrots)
+    epTableOfContentsPlugin(cssSectionSelecrots);
 
-    Helper.innerSkeleton("hide")
+    Helper.innerSkeleton("hide");
 
-    if (callback) callback()
+    if (callback) callback();
   }
+
+
+  $(document).on('click', '.btn_filter_act[active="true"]', function () {
+    Helper.innerSkeleton("show");
+    const filterId = $(this).attr('filter-id')
+    const filter = filterList.get(filterId)
+    const currentPath = location.pathname
+    const slugIndex = currentPath.split('/').indexOf(filter.slug)
+    const newPath = currentPath.split('/')
+    newPath.splice(slugIndex, 1)
+    let targetPath = newPath.join('/')
+    if (targetPath.length === 0) targetPath = '/'
+
+    if (!filter) return false;
+
+    const filterList = Array.from(filterList.values());
+    window.softReloadLRHAttribute();
+    window.history.pushState({ filter, filterList }, filter.name, targetPath)
+    Helper.filterRowActivation(this, "deactive");
+    setTimeout(() => {
+      Helper.evaluateSearchResult(filter.name, (result) => {
+        console.log(result, filter)
+        appendCssFilter();
+      })
+    }, 1000);
+    // window.location.href = targetPath
+  });
+
+
+
+  $(document).on('click', '.btn_filter_act[active="false"]', function () {
+    Helper.innerSkeleton("show");
+    const filterId = $(this).attr('filter-id')
+    const filter = filterList.get(filterId)
+    window.history.pushState({ filter, filterList: Array.from(filterList.values()) }, filter.name)
+    const currentPath = location.pathname.split('/')
+    currentPath.push(filter.slug)
+    if (currentPath[0] === '' && currentPath[1] === '') currentPath.shift()
+    const targetPath = currentPath.join('/')
+    const filterList = Array.from(filterList.values());
+
+    window.softReloadLRHAttribute();
+    window.history.pushState({ filter, filterList }, document.title, targetPath)
+    Helper.filterRowActivation(this, "active");
+    setTimeout(() => {
+      Helper.evaluateSearchResult(filter.name, (result) => {
+        console.log(result, filter)
+        appendCssFilter();
+      })
+    }, 1000);
+    // window.location.href = targetPath
+  })
+
 
 
 
