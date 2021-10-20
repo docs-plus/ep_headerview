@@ -525,9 +525,9 @@ exports.postAceInit = (hookName, context) => {
 
     if (!filter) return false;
 
-    const filterList = Array.from(filterList.values());
+    const filters = Array.from(filterList.values());
     window.softReloadLRHAttribute();
-    window.history.pushState({ filter, filterList }, filter.name, targetPath)
+    window.history.pushState({ filter, filters }, filter.name, targetPath)
     Helper.filterRowActivation(this, "deactive");
     setTimeout(() => {
       Helper.evaluateSearchResult(filter.name, (result) => {
@@ -549,10 +549,10 @@ exports.postAceInit = (hookName, context) => {
     currentPath.push(filter.slug)
     if (currentPath[0] === '' && currentPath[1] === '') currentPath.shift()
     const targetPath = currentPath.join('/')
-    const filterList = Array.from(filterList.values());
+    const filters = Array.from(filterList.values());
 
     window.softReloadLRHAttribute();
-    window.history.pushState({ filter, filterList }, document.title, targetPath)
+    window.history.pushState({ filter, filterList: filters }, document.title, targetPath)
     Helper.filterRowActivation(this, "active");
     setTimeout(() => {
       Helper.evaluateSearchResult(filter.name, (result) => {
