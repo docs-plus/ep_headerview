@@ -257,20 +257,22 @@ exports.postAceInit = (hookName, context) => {
     $(document).find('head #tocCustomHeader').html(css)
   }
 
-  const appendCssFilter = (callback) => {
+  const appendCssFilter = (callback, locationPath) => {
     let css = ''
     let bucketSearchResult = []
     const filterIncludesSections = []
     const slugsScore = {}
     const sectionsContaintSlugs = []
 
-    const currentPath = location.pathname.split('/')
+    let currentPath = location.pathname.split('/');
+    if(locationPath) currentPath = locationPath.split('/');
     let filterURL = [...currentPath].splice((Helper.doesHaveP() ? 3 : 2), currentPath.length - 1)
 
-    console.info('[headerview]: filterURL', filterURL)
+    // console.info('[headerview]: filterURL', filterURL.length, currentPath, clientVars.ep_singlePad.active)
 
     if (clientVars.ep_singlePad.active) {
       filterURL = location.pathname.split('/')
+      if(locationPath) filterURL = locationPath.split('/');
       const doesUrlHavePadId = filterURL.indexOf(clientVars.padId) >= 0
 
       // /p/padName/slug = ["", "p","padName","slug"] OR /padName/slug = ["", "padName", slug]
@@ -315,6 +317,7 @@ exports.postAceInit = (hookName, context) => {
       sectionsContaintSlugs.push(...sectionsSlugs)
     })
 
+    // console.info(`[headerview]: headerContetnts,`, headerContetnts)
     // console.info(`[headerview]: sectionsContaintSlugs,`, sectionsContaintSlugs)
 
     const slugsScoreKeys = Object.keys(slugsScore)
@@ -521,21 +524,12 @@ exports.postAceInit = (hookName, context) => {
     const newPath = currentPath.split('/')
     newPath.splice(slugIndex, 1)
     let targetPath = newPath.join('/')
-    if (targetPath.length === 0) targetPath = '/'
+    if (targetPath.length === 0) targetPath = '/';
 
     if (!filter) return false;
 
-    const filters = Array.from(filterList.values());
-    window.softReloadLRHAttribute();
-    window.history.pushState({ filter, filters }, filter.name, targetPath)
     Helper.filterRowActivation(this, "deactive");
-    setTimeout(() => {
-      Helper.evaluateSearchResult(filter.name, (result) => {
-        console.log(result, filter)
-        appendCssFilter();
-      })
-    }, 1000);
-    // window.location.href = targetPath
+    applyFilter(filter, targetPath);
   });
 
 
@@ -548,22 +542,27 @@ exports.postAceInit = (hookName, context) => {
     const currentPath = location.pathname.split('/')
     currentPath.push(filter.slug)
     if (currentPath[0] === '' && currentPath[1] === '') currentPath.shift()
-    const targetPath = currentPath.join('/')
-    const filters = Array.from(filterList.values());
+    const targetPath = currentPath.join('/');
 
-    window.softReloadLRHAttribute();
-    window.history.pushState({ filter, filterList: filters }, document.title, targetPath)
     Helper.filterRowActivation(this, "active");
-    setTimeout(() => {
-      Helper.evaluateSearchResult(filter.name, (result) => {
-        console.log(result, filter)
-        appendCssFilter();
-      })
-    }, 1000);
-    // window.location.href = targetPath
+    applyFilter(filter, targetPath);
   })
 
 
+  const applyFilter = (filter, targetPath) => {
+    const filters = Array.from(filterList.values());
+    window.softReloadLRHAttribute();
+    window.history.pushState({ filter, filterList: filters }, document.title, targetPath);
+    filteredHeaders = [];
+    includeSections = [];
+    setTimeout(() => {
+      Helper.updateHeaderList(() => {
+        Helper.evaluateSearchResult(filter.name, () => {
+          appendCssFilter(null, targetPath);
+        });
+      });
+    }, 500);
+  }
 
 
   if (clientVars.padId !== clientVars.padView) {

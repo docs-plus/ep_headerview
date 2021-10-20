@@ -211,14 +211,13 @@ const innerSkeleton = (action) => {
 };
 
 const filterRowActivation = (el, action) => {
-  let active = action === "active" ? true: false;
-
-  $(el).attr("active", active);
+  const active = action === 'active' ? true : false;
+  $(el).attr('active', active);
   $(el).parent().parent().attr({
-    active: active,
-    highlight: active
+    active,
+    highlight: active,
   });
-}
+};
 
 module.exports = {
   removeFilter,
@@ -231,5 +230,5 @@ module.exports = {
   updateHeaderList,
   doesHaveP,
   innerSkeleton,
-  filterRowActivation
+  filterRowActivation,
 };
