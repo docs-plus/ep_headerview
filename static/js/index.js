@@ -551,7 +551,7 @@ exports.postAceInit = (hookName, context) => {
 
   const applyFilter = (filter, targetPath) => {
     const filters = Array.from(filterList.values());
-    window.softReloadLRHAttribute();
+    window.softReloadLRHAttributes();
     window.history.pushState({ filter, filterList: filters }, document.title, targetPath);
     filteredHeaders = [];
     includeSections = [];
