@@ -1,27 +1,5 @@
 <li class="separator acl-write"></li>
 <li class="separator"></li>
-<style>
-  #btn_filterView{
-    width: 28px;
-    height: 28px;
-    padding: 0;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-  }
-  #btn_filterView svg{
-    fill: #576273;
-    width: 14px;height: auto;
-  }
-  #btn_filterView.active{
-    background-color: #576273;
-
-  }
-  #btn_filterView.active svg {
-    fill: #fff;
-  }
-</style>
 <li class="" data-type="button" data-key="filter" style="position: relative;margin-right: 10px;">
   <a href="">
     <button id="btn_filterView">
@@ -33,246 +11,52 @@
 
 </li>
 <li class="separator"></li>
-<style>
-  .toolbar ul,
-  .toolbar {
-    overflow: visible;
-  }
 
-  .modal_filter{
-    width: 380px;
-    min-height: 160px;
-    padding: 15px;
-    background-color: #fff;
-    border-radius: 5px;
-    box-shadow: 1px 1px 10px rgba(0, 0, 0, .2);
-    position: absolute;
-    top: 54px;
-    right: 0;
-    font-family: Quicksand, Roboto, RobotoDraft, Helvetica, Arial, sans-serif;
-    display: none;
-    opacity: 0;
-    box-shadow: 0 0 0 1px rgb(99 114 130 / 16%), 0 8px 16px rgb(27 39 51 / 8%);
-    /* transition-delay: 0.5s; */
-    /* transition: all  0.3s cubic-bezier(0.19, 1, 0.22, 1); */
-  }
-  .modal_filter.active{
-    display: block;
-    opacity: 1;
-    /* visibility: visible; */
-  }
-
-  .modal_filter .modal_header {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    margin-bottom: 8px;
-  }
-
-  .modal_filter .modal_header button {
-    padding: 0;
-  }
-
-  .modal_filter .modal_header p.title {
-    font-weight: 500;
-    font-size: 1.4rem;
-  }
-  .modal_filter .section_form {
-    padding: 5px 0 15px;
-    margin-bottom: 8px;
-    border-bottom: 1px solid rgba(0, 0, 0, .2);
-    display: flex;
-    flex-direction: column;
-
-  }
-  .modal_filter .section_form .form_inputs{
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    margin: 5px 0;
-    font-size: 0.92rem;
-    font-weight: 600;
-    align-items: center;
-  }
-  .modal_filter .section_form .form_inputs input {
-    width: 100%;
-    padding: 6px;
-    border: 2px solid transparent;
-    padding: 4px 6px;
-  }
-  .modal_filter .section_form .form_inputs input:focus {
-    border-color: #2678FF;
-  }
-  .modal_filter .section_form .inputs_label {
-    width: 70px;
-    padding-right: 8px;
-
-  }
-  .modal_filter .section_form .form_bottom {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    margin-top: 12px;
-    font-size: 0.96rem;
-    padding-left: 60px;
-    align-items: center;
-
-  }
-
-  .modal_filter .section_form .form_bottom button{
-    background-color: #eee;
-    text-transform: capitalize;
-    padding: 6px 14px;
-    color: #aaa;
-  }
-  .modal_filter .section_form .form_bottom button.active{
-    background-color: #2678FF;
-    color: #fff;
-  }
-
-  .section_filterList .title{
-    font-weight: 500;
-  font-size: 1.4rem;
-  }
-
-  .section_filterList ul{
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-  margin-top: 10px;
-  max-height: 160px;
-  transition: all .2s linear;
-  overflow: auto;
-}
-  .section_filterList ul li{
-    width: 100%;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 0.92rem;
-    font-weight: 600;
-    margin: 2px 0!important;
-    padding: 2px 6px;
-  }
-  .section_filterList ul li > div:last-of-type {
-    width: 56px;
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-end;
-  }
-
-  .section_filterList ul li button{
-    padding: 0;
-  }
-
-  .section_filterList ul li button.btn_filter_act,
-  .section_filterList ul li button.btn_filter_remove {
-    width: 28px;
-    height: 28px;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-  }
-
-  .section_filterList ul li button.btn_filter_act > svg,
-  .section_filterList ul li button.btn_filter_remove >  svg {
-    width: 28px;
-  }
-
-  .section_filterList ul li button.btn_filter_remove > svg {
-    width: 32px;
-  }
-
-  .section_filterList ul li button.btn_filter_remove:hover,
-  .section_filterList ul li button.btn_filter_act:hover{
-    background-color: #eee;
-  }
-
-  .section_filterList ul li button.btn_filter_act svg{
-    display: none;
-  }
-
-  .section_filterList ul li button.btn_filter_act[active="true"] svg.active {
-    display: block;
-  }
-
-  .section_filterList ul li button.btn_filter_act[active="false"] svg.deactive {
-    display: block;
-  }
-
-  .section_filterList ul li .filter_url {
-    color: #aaa;
-    font-weight: 500;
-  }
-
-  .section_filterList ul li[highlight="true"] {
-    background-color: #dafef2;
-    border-radius: 5px;
-  }
-
-  .filterNumResults.active{
-    color: #2a2a2a;
-    text-decoration: underline;
-    font-weight: bold;
-  }
-
-  li.filterEmpty{
-    color: #ddd;
-    justify-content: center!important;
-    font-size: 1.0rem!important;
-    text-align: center;
-    line-height: 20px;
-    text-transform: uppercase;
-    padding-top: 15px;
-  }
-
-  li .filter_undo{
-    width: 100%;
-    padding: 6px;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    background: #eee;
-    border-radius: 5px;
-    box-shadow: 1px 1px 0px rgb(0 0 0 / 10%);
-    margin: 6px 0;
-    text-transform: capitalize;
-  }
-
-  li .filter_undo button{
-    background: #2678FF;
-    color: #fff;
-    padding: 4px 10px!important;
-    font-size: .8rem;
-  }
-  .form_inputs #filter_url::placeholder{color: #ddd;}
-  .section_filterList .loader {
-    border: 6px solid #f3f3f3;
-    border-top: 6px solid #3498db;
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    animation: spin 2s linear infinite;
-    position: absolute;
-    left: calc(-30px - -50%);
-    top: calc(-10px - -50%);
-    display: none;
-  }
-
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-</style>
 <div class="modal_filter">
   <div class="modal_header">
-    <p class="title">Create Filter</p>
+    <p class="title">Filters</p>
+
     <button class="btn_closeModal"><i class="buttonicon buttonicon-times"></i></button>
   </div>
+
+  <div class="section_filterList" style="position: relative;">
+    <div class="loader">
+      <div class="row">
+        <div class="line name"></div>
+        <div class="line filter"></div>
+        <div class="box action"></div>
+      </div>
+      <div class="row">
+        <div class="line name"></div>
+        <div class="line filter"></div>
+        <div class="box action"></div>
+      </div>
+      <div class="row">
+        <div class="line name"></div>
+        <div class="line filter"></div>
+        <div class="box action"></div>
+      </div>
+      <div class="row">
+        <div class="line name"></div>
+        <div class="line filter"></div>
+        <div class="box action"></div>
+      </div>
+      <div class="row">
+        <div class="line name"></div>
+        <div class="line filter"></div>
+        <div class="box action"></div>
+      </div>
+    </div>
+
+    <ul>
+      <li class="filterEmpty">
+        <p>There is no filter <br> create the first filter</p>
+      </li>
+    </ul>
+  </div>
+
   <div class="section_form">
+    <p class="title">Create Filter</p>
     <div class="form_inputs">
       <label for="filter_name" class="inputs_label">Filter</label>
       <input type="text" name="filter_name" value="" id="filter_name" >
@@ -291,15 +75,7 @@
       <button class="btn_createFilter" disabled="true">Create</button>
     </div>
   </div>
-  <div class="section_filterList" style="position: relative;">
-    <p class="title">Filters</p>
-    <div class="loader"></div>
-    <ul>
-      <li class="filterEmpty">
-        <p>There is no filter <br> create the first filter</p>
-      </li>
-    </ul>
-  </div>
+
 </div>
 
 <script id="filter_listItem" type="text/html">

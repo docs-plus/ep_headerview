@@ -1,12 +1,12 @@
-div.ace-line{
+div.ace-line {
   position: relative;
 }
 
-#editorcontainerbox #editorcontainer{
+#editorcontainerbox #editorcontainer {
   position: relative;
 }
 
-#editorSkeletonWrapper{
+#editorSkeletonWrapper {
   position: absolute;
   width: calc(100% - 6px);
   height: 100%;
@@ -40,33 +40,26 @@ div.ace-line{
   margin-top: 40px;
 }
 
-#editorSkeleton .paragraph:first-of-type{
+#editorSkeleton .paragraph:first-of-type {
   margin-top: 0;
 }
-
 #editorSkeleton .paragraph .line {
-  height: 16px;
-  margin-top: 12px;
-  border-radius: 4px;
-  background-image: linear-gradient(90deg, #ddd 0px, #e8e8e8 40px, #ddd 80px);
-  background-size: 600px;
-  animation: shine-lines 1.6s infinite linear;
-  background-color: #ddd;
+  margin-top: 16px;
 }
 
-#editorSkeleton .paragraph .line.large{
+#editorSkeleton .paragraph .line.large {
   width: 100%;
 }
 
-#editorSkeleton .paragraph .line.medium{
+#editorSkeleton .paragraph .line.medium {
   width: 90%;
 }
 
-#editorSkeleton .paragraph .line.small{
+#editorSkeleton .paragraph .line.small {
   width: 70%;
 }
 
-#editorSkeleton .paragraph .line.header{
+#editorSkeleton .paragraph .line.header {
   width: 45%;
   background-color: #ccc;
   background-image: linear-gradient(90deg, #ccc 0px, #e8e8e8 40px, #ccc 80px);
@@ -78,12 +71,13 @@ div.ace-line{
   0% {
     background-position: -100px;
   }
-  40%, 100% {
+  40%,
+  100% {
     background-position: 140px;
   }
 }
 
-#filterLoader{
+#filterLoader {
   border: 6px solid #f3f3f3;
   border-top: 6px solid #3498db;
   border-radius: 50%;
@@ -96,7 +90,7 @@ div.ace-line{
   display: none;
 }
 
-#filterLoader::after{
+#filterLoader::after {
   border: 6px solid #f3f3f3;
   border-top: 6px solid #3498db;
   border-radius: 50%;
@@ -108,9 +102,313 @@ div.ace-line{
   top: calc(-10px - -50%);
   display: none;
 }
-
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/**/
+
+#btn_filterView {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+#btn_filterView svg {
+  fill: #576273;
+  width: 14px;
+  height: auto;
+}
+#btn_filterView.active {
+  background-color: #576273;
+}
+#btn_filterView.active svg {
+  fill: #fff;
+}
+
+/**/
+.toolbar ul,
+.toolbar {
+  overflow: visible;
+}
+
+.modal_filter {
+  width: 430px;
+  min-height: 160px;
+  padding: 15px;
+  background-color: #fff;
+  border-radius: 5px;
+  box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.2);
+  position: absolute;
+  top: 54px;
+  right: 0;
+  font-family: Quicksand, Roboto, RobotoDraft, Helvetica, Arial, sans-serif;
+  display: none;
+  opacity: 0;
+  box-shadow: 0 0 0 1px rgb(99 114 130 / 16%), 0 8px 16px rgb(27 39 51 / 8%);
+}
+.modal_filter.active {
+  display: block;
+  opacity: 1;
+}
+
+.modal_filter .modal_header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.modal_filter .modal_header button {
+  padding: 0;
+}
+
+.modal_filter .modal_header p.title {
+  font-weight: 500;
+  font-size: 1.4rem;
+}
+.modal_filter .section_form {
+  padding: 5px 0 0;
+  display: flex;
+  flex-direction: column;
+}
+.modal_filter .section_form .form_inputs {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin: 5px 0;
+  font-size: 0.92rem;
+  font-weight: 600;
+  align-items: center;
+}
+.modal_filter .section_form .form_inputs input {
+  width: 100%;
+  padding: 6px;
+  border: 2px solid transparent;
+  padding: 4px 6px;
+}
+.modal_filter .section_form .form_inputs input:focus {
+  border-color: #2678ff;
+}
+.modal_filter .section_form .inputs_label {
+  width: 70px;
+  padding-right: 8px;
+}
+.modal_filter .section_form .form_bottom {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin-top: 12px;
+  font-size: 0.96rem;
+  padding-left: 60px;
+  align-items: center;
+}
+
+.modal_filter .section_form .form_bottom button {
+  background-color: #eee;
+  text-transform: capitalize;
+  padding: 6px 14px;
+  color: #aaa;
+}
+.modal_filter .section_form .form_bottom button.active {
+  background-color: #2678ff;
+  color: #fff;
+}
+
+.section_filterList {
+  margin-bottom: 8px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.section_filterList .title,
+.section_form .title {
+  font-weight: 500;
+  font-size: 1.4rem;
+}
+
+.section_filterList ul {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  margin-top: 10px;
+  max-height: 180px;
+  transition: all 0.2s linear;
+  overflow: auto;
+}
+.section_filterList ul li {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.92rem;
+  font-weight: 600;
+  margin: 2px 0 !important;
+  padding: 2px 6px;
+}
+.section_filterList ul li > div:last-of-type {
+  width: 56px;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+}
+
+.section_filterList ul li button {
+  padding: 0;
+}
+
+.section_filterList ul li button.btn_filter_act,
+.section_filterList ul li button.btn_filter_remove {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.section_filterList ul li button.btn_filter_act > svg,
+.section_filterList ul li button.btn_filter_remove > svg {
+  width: 28px;
+}
+
+.section_filterList ul li button.btn_filter_remove > svg {
+  width: 32px;
+}
+
+.section_filterList ul li button.btn_filter_remove:hover,
+.section_filterList ul li button.btn_filter_act:hover {
+  background-color: #eee;
+}
+
+.section_filterList ul li button.btn_filter_act svg {
+  display: none;
+}
+
+.section_filterList ul li button.btn_filter_act[active="true"] svg.active {
+  display: block;
+}
+
+.section_filterList ul li button.btn_filter_act[active="false"] svg.deactive {
+  display: block;
+}
+
+.section_filterList ul li .filter_url {
+  color: #aaa;
+  font-weight: 500;
+}
+
+.section_filterList ul li[highlight="true"] {
+  background-color: #dafef2;
+  border-radius: 5px;
+}
+
+.filterNumResults.active {
+  color: #2a2a2a;
+  text-decoration: underline;
+  font-weight: bold;
+}
+
+li.filterEmpty {
+  color: #ddd;
+  justify-content: center !important;
+  font-size: 1rem !important;
+  text-align: center;
+  line-height: 20px;
+  text-transform: uppercase;
+  padding-top: 15px;
+  padding: 0px 0 14px !important;
+}
+
+li .filter_undo {
+  width: 100%;
+  padding: 6px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  background: #eee;
+  border-radius: 5px;
+  box-shadow: 1px 1px 0px rgb(0 0 0 / 10%);
+  margin: 6px 0;
+  text-transform: capitalize;
+}
+
+li .filter_undo button {
+  background: #2678ff;
+  color: #fff;
+  padding: 4px 10px !important;
+  font-size: 0.8rem;
+}
+.form_inputs #filter_url::placeholder {
+  color: #ddd;
+}
+
+.section_filterList .loader {
+  background-color: #fff;
+  position: absolute;
+  height: 100%;
+  max-height: 180px;
+  width: 100%;
+  z-index: 1;
+  padding: 0 10px;
+  overflow: hidden;
+}
+
+.section_filterList .loader .row {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  align-content: space-between;
+  margin-top: 17px;
+}
+
+#editorSkeleton .paragraph .line,
+.section_filterList .loader .line,
+.section_filterList .loader .box::after,
+.section_filterList .loader .box::before {
+  content: "";
+  height: 16px;
+  border-radius: 4px;
+  background-image: linear-gradient(90deg, #ddd 0px, #e8e8e8 40px, #ddd 80px);
+  background-size: 600px;
+  animation: shine-lines 1.6s infinite linear;
+  background-color: #ddd;
+  display: block;
+}
+
+.section_filterList .loader .line.name {
+  width: 25%;
+  margin-right: 16px;
+}
+
+.section_filterList .loader .line.filter {
+  width: 60%;
+}
+
+.section_filterList .loader .box.action {
+  display: flex;
+  align-items: center;
+  margin-left: 18px;
+}
+
+.section_filterList .loader .box.action::before {
+  height: 16px;
+  width: 20px;
+  margin-right: 3px;
+}
+.section_filterList .loader .box.action::after {
+  height: 16px;
+  width: 20px;
+  margin-left: 3px;
 }
