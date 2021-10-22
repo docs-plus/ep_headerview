@@ -126,7 +126,7 @@ const updateHeaderList = (callback, selectedSections = []) => {
     headers = $bodyAceOuter()
         .find('iframe')
         .contents()
-        .find(selectedSections)
+        .find(selectedSections.join(','))
         .find(':header');
   } else {
     headers = $bodyAceOuter().find('iframe').contents().find(':header');

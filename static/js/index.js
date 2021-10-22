@@ -510,6 +510,7 @@ exports.postAceInit = (hookName, context) => {
     epTableOfContentsPlugin(cssSectionSelecrots);
 
     Helper.innerSkeleton("hide");
+    Helper.updateHeaderList(null, includeSections);
 
     if (callback) callback();
   }
@@ -557,9 +558,7 @@ exports.postAceInit = (hookName, context) => {
     includeSections = [];
     setTimeout(() => {
       Helper.updateHeaderList(() => {
-        Helper.evaluateSearchResult(filter.name, () => {
-          appendCssFilter(null, targetPath);
-        });
+        appendCssFilter(null, targetPath);
       });
     }, 500);
   }
@@ -606,15 +605,11 @@ exports.postAceInit = (hookName, context) => {
 
             socket.emit('addNewFilter', clientVars.padId, filter, (res) => {
               window.history.pushState({ filter, filterList: list }, document.title)
-              Helper.evaluateSearchResult(filter.name, (result) => {
                 appendCssFilter()
-              })
             })
           } else {
             window.history.pushState({ filter, filterList: list }, document.title)
-            Helper.evaluateSearchResult(filter.name, (result) => {
               appendCssFilter()
-            })
           }
         })
       })
