@@ -106,9 +106,9 @@ const appendCustomStyleTag = () => {
 const eventListner = () => {
   $(window).resize(_.debounce(Helper.adoptFilterModalPosition, 250))
 
-  $('.btn_createFilter').on('click', createNewFilter)
+  $(document).on('click', '.btn_createFilter', createNewFilter)
 
-  $('button#btn_filterView').on('click', (e) => {
+  $(document).on('click', 'button#btn_filterView', (e) => {
     displayFilterModal()
     $('.section_filterList .loader').show()
     $('.section_filterList ul').css({"opacity": 0})
@@ -126,11 +126,13 @@ const eventListner = () => {
     })
   })
 
-  $('button#btn_filterView, .modal_filter button.btn_closeModal').on('click', () => {
-    Helper.updateHeaderList(null, includeSections)
-  });
+  $(document)
+    .on('click', 'button#btn_filterView, .modal_filter button.btn_closeModal', () => {
+      Helper.updateHeaderList(null, includeSections)
+    });
 
-  $('.modal_filter button.btn_closeModal').on('click', () => Helper.closeOpenFilterModal());
+  $(document)
+    .on('click', '.modal_filter button.btn_closeModal', () => Helper.closeOpenFilterModal());
 
   $(document).on('click', '.btn_filter_remove', function () {
     const filterId = $(this).attr('filter-id')
@@ -173,9 +175,6 @@ const eventListner = () => {
       .html(`<li class="row_${filterId}" active="${active}" highlight="${highlight}">${$(rowFilter).html()}</li>`)
   })
 
-
-
-
   $('.modal_filter  input#filter_name')
     .focusin(function () {
       const inputText = $(this).val()
@@ -213,17 +212,13 @@ const eventListner = () => {
     })
 }
 
-
-
 exports.postAceInit = (hookName, context) => {
-  clientVars.ep_headerview = {}
-  initSocket()
-  appendCustomStyleTag()
-  eventListner()
-
+  clientVars.ep_headerview = {};
+  Helper.insterFilterModal();
+  initSocket();
+  appendCustomStyleTag();
+  eventListner();
   Helper.innerSkeleton("append");
-
-  Helper.insterFilterModal()
 
   const createCssFilterForParentHeaders = (tagIndex, titleId, section, lrhSectionId) => {
     return `[sectionid='${lrhSectionId}'],[titleid='${titleId}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`
@@ -528,8 +523,6 @@ exports.postAceInit = (hookName, context) => {
     Helper.filterRowActivation(this, "deactive");
     applyFilter(filter, targetPath);
   });
-
-
 
   $(document).on('click', '.btn_filter_act[active="false"]', function () {
     Helper.innerSkeleton("show");

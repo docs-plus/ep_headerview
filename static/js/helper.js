@@ -64,6 +64,7 @@ const adoptFilterModalPosition = () => {
 };
 
 const closeOpenFilterModal = () => {
+  console.log('alskd;lak999i98');
   $('#filterModal').toggleClass('popup-show');
 };
 
