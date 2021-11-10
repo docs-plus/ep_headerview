@@ -60,7 +60,11 @@ const adoptFilterModalPosition = () => {
   const pos = $('button#btn_filterView').offset();
   const modalWith = $('.modal_filter').outerWidth(true);
   const btnFilterWith = $('button#btn_filterView').outerWidth(true);
-  $('.modal_filter').css({left: pos.left - modalWith + btnFilterWith});
+  $('#filterModal').css({left: (pos.left - (modalWith + btnFilterWith)) + 20});
+};
+
+const closeOpenFilterModal = () => {
+  $('#filterModal').toggleClass('popup-show');
 };
 
 const doesFilterExist = (inputFilterVal) => {
@@ -92,6 +96,7 @@ const doesFilterExist = (inputFilterVal) => {
 const doesFilterUrlExist = (slug) => {
   const filters = Array.from(filterList.values());
   const path = `${location.pathname}/${slug}`;
+  console.log(path, filters.find((e) => path === e.path));
   return filters.length <= 0 ? false : !!filters.find((e) => path === e.path);
 };
 
@@ -102,6 +107,8 @@ const evaluateSearchResult = (value, callback) => {
   const results = headerContetnts.filter((x) => x.text.match(regEx)) || [];
 
   const filterURl = $('#filter_url').val();
+
+  console.log(doesFilterExist(value), doesFilterUrlExist(filterURl), '=-==28756789uh');
   if (doesFilterExist(value) && doesFilterUrlExist(filterURl)) {
     $('.btn_createFilter').removeClass('active').attr('disabled', true);
     console.info('[headerview]: filter is exists! try andother filter name');
@@ -219,6 +226,12 @@ const filterRowActivation = (el, action) => {
   });
 };
 
+const insterFilterModal = () => {
+  const filterModalBox = $('#filterPopupTemplate').tmpl();
+  filterModalBox.appendTo($('#editorcontainerbox'));
+};
+
+
 module.exports = {
   removeFilter,
   appendFilter,
@@ -231,4 +244,8 @@ module.exports = {
   doesHaveP,
   innerSkeleton,
   filterRowActivation,
+  insterFilterModal,
+  closeOpenFilterModal,
+
+
 };

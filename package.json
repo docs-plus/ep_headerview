@@ -1,7 +1,7 @@
 {
   "name": "ep_headerview",
   "description": "Another docsplus plugin, filter sections",
-  "version": "0.17.2",
+  "version": "0.17.5",
   "scripts": {
     "lint": "eslint .",
     "lint:fix": "eslint --fix ."

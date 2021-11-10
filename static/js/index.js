@@ -108,7 +108,8 @@ const eventListner = () => {
 
   $('.btn_createFilter').on('click', createNewFilter)
 
-  $('button#btn_filterView').on('click', () => {
+  $('button#btn_filterView').on('click', (e) => {
+    displayFilterModal()
     $('.section_filterList .loader').show()
     $('.section_filterList ul').css({"opacity": 0})
 
@@ -126,17 +127,10 @@ const eventListner = () => {
   })
 
   $('button#btn_filterView, .modal_filter button.btn_closeModal').on('click', () => {
-    const pos = $('button#btn_filterView').offset()
-    const modalWith = $('.modal_filter').outerWidth(true)
-    const btnFilterWith = $('button#btn_filterView').outerWidth(true)
-
-    $('.modal_filter')
-      .toggleClass('active')
-      .css({ left: pos.left - modalWith + btnFilterWith })
-
-    $('#btn_filterView').toggleClass('active')
     Helper.updateHeaderList(null, includeSections)
-  })
+  });
+
+  $('.modal_filter button.btn_closeModal').on('click', () => Helper.closeOpenFilterModal());
 
   $(document).on('click', '.btn_filter_remove', function () {
     const filterId = $(this).attr('filter-id')
@@ -228,6 +222,8 @@ exports.postAceInit = (hookName, context) => {
   eventListner()
 
   Helper.innerSkeleton("append");
+
+  Helper.insterFilterModal()
 
   const createCssFilterForParentHeaders = (tagIndex, titleId, section, lrhSectionId) => {
     return `[sectionid='${lrhSectionId}'],[titleid='${titleId}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`
@@ -618,4 +614,10 @@ exports.postAceInit = (hookName, context) => {
   } else {
     Helper.innerSkeleton("hide");
   }
+}
+
+
+const displayFilterModal = () => {
+  Helper.adoptFilterModalPosition()
+  Helper.closeOpenFilterModal()
 }

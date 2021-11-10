@@ -8,6 +8,10 @@ exports.eejsBlock_styles = (hook_name, args, cb) => {
   return {};
 };
 
+exports.eejsBlock_scripts = (hook_name, args, cb) => {
+  args.content += eejs.require('ep_headerview/templates/filterModal.html');
+  return cb();
+};
 
 exports.eejsBlock_editbarMenuRight = (hookName, args, cb) => {
   args.content += eejs.require('ep_headerview/templates/editbarButtons.ejs');
