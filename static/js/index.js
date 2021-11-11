@@ -104,6 +104,7 @@ const appendCustomStyleTag = () => {
 }
 
 const eventListner = () => {
+
   $(window).resize(_.debounce(Helper.adoptFilterModalPosition, 250))
 
   $(document).on('click', '.btn_createFilter', createNewFilter)
@@ -528,12 +529,12 @@ exports.postAceInit = (hookName, context) => {
     Helper.innerSkeleton("show");
     const filterId = $(this).attr('filter-id')
     const filter = filterList.get(filterId)
-    window.history.pushState({ filter, filterList: Array.from(filterList.values()) }, filter.name)
     const currentPath = location.pathname.split('/')
     currentPath.push(filter.slug)
     if (currentPath[0] === '' && currentPath[1] === '') currentPath.shift()
     const targetPath = currentPath.join('/');
 
+    window.history.pushState({ filter, filterList: Array.from(filterList.values()), targetPath }, filter.name)
     Helper.filterRowActivation(this, "active");
     applyFilter(filter, targetPath);
   })
@@ -542,7 +543,7 @@ exports.postAceInit = (hookName, context) => {
   const applyFilter = (filter, targetPath) => {
     const filters = Array.from(filterList.values());
     window.softReloadLRHAttributes();
-    window.history.pushState({ filter, filterList: filters }, document.title, targetPath);
+    window.history.pushState({ filter, filterList: filters, targetPath }, document.title, targetPath);
     filteredHeaders = [];
     includeSections = [];
     setTimeout(() => {
