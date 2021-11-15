@@ -507,7 +507,6 @@ exports.postAceInit = (hookName, context) => {
     if (callback) callback();
   }
 
-
   $(document).on('click', '.btn_filter_act[active="true"]', function () {
     Helper.innerSkeleton("show");
     const filterId = $(this).attr('filter-id')
@@ -534,16 +533,15 @@ exports.postAceInit = (hookName, context) => {
     if (currentPath[0] === '' && currentPath[1] === '') currentPath.shift()
     const targetPath = currentPath.join('/');
 
-    window.history.pushState({ filter, filterList: Array.from(filterList.values()), targetPath }, filter.name)
+    window.history.pushState({type: "filter", filter, filterList: Array.from(filterList.values()), targetPath }, filter.name)
     Helper.filterRowActivation(this, "active");
     applyFilter(filter, targetPath);
   })
 
-
-  const applyFilter = (filter, targetPath) => {
+  const applyFilter = (filter = {}, targetPath) => {
     const filters = Array.from(filterList.values());
     window.softReloadLRHAttributes();
-    window.history.pushState({ filter, filterList: filters, targetPath }, document.title, targetPath);
+    window.history.pushState({type: "filter", filter, filterList: filters, targetPath }, document.title, targetPath);
     filteredHeaders = [];
     includeSections = [];
     setTimeout(() => {
@@ -553,6 +551,16 @@ exports.postAceInit = (hookName, context) => {
     }, 500);
   }
 
+  // if history state has change fire joinQueryString
+  document.addEventListener('onPushState', (event) => {
+    const {state} =  event.detail;
+    if(state.type === "hyperLink"){
+      const href= state.href;
+      let targetPath = new URL(href);
+      targetPath = targetPath.pathname;
+      applyFilter(null, targetPath);
+    }
+  });
 
   if (clientVars.padId !== clientVars.padView) {
     Helper.innerSkeleton("show");
@@ -591,15 +599,13 @@ exports.postAceInit = (hookName, context) => {
 
             filterList.set(filter.id, filter)
 
-
-
             socket.emit('addNewFilter', clientVars.padId, filter, (res) => {
-              window.history.pushState({ filter, filterList: list }, document.title)
-                appendCssFilter()
+              window.history.pushState({type: "filter", filter, filterList: list }, document.title)
+              appendCssFilter();
             })
           } else {
-            window.history.pushState({ filter, filterList: list }, document.title)
-              appendCssFilter()
+            window.history.pushState({type: "filter", filter, filterList: list }, document.title)
+            appendCssFilter();
           }
         })
       })
@@ -609,7 +615,6 @@ exports.postAceInit = (hookName, context) => {
     Helper.innerSkeleton("hide");
   }
 }
-
 
 const displayFilterModal = () => {
   Helper.adoptFilterModalPosition()
