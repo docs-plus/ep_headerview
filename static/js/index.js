@@ -558,7 +558,18 @@ exports.postAceInit = (hookName, context) => {
       const href= state.href;
       let targetPath = new URL(href);
       targetPath = targetPath.pathname;
-      applyFilter(null, targetPath);
+      if(!targetPath) return;
+      Helper.innerSkeleton("show");
+      if(filterList.size === 0){
+        socket.emit('getFilterList', clientVars.padId, (list) => {
+          list.forEach(filter => {
+            if (!filterList.has(filter.id)) filterList.set(filter.id, filter)
+          });
+          applyFilter(null, targetPath);
+        })
+      }else {
+        applyFilter(null, targetPath);
+      }
     }
   });
 
