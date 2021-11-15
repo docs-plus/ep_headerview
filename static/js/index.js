@@ -107,24 +107,25 @@ const eventListner = () => {
 
   $(window).resize(_.debounce(Helper.adoptFilterModalPosition, 250))
 
-  $(document).on('click', '.btn_createFilter', createNewFilter)
+  $(document).on('click', '.btn_createFilter', createNewFilter);
 
   $(document).on('click', 'button#btn_filterView', (e) => {
     displayFilterModal()
-    $('.section_filterList .loader').show()
-    $('.section_filterList ul').css({"opacity": 0})
+    $('.section_filterList .loader').show();
+    $('.section_filterList ul').css({"opacity": 0});
 
     socket.emit('getFilterList', clientVars.padId, (list) => {
-      clearFilterListSection()
-      clientVars.ep_headerview.filterList = list
+      clearFilterListSection();
+      clientVars.ep_headerview.filterList = list;
       list.forEach((row) => {
-        if (!filterList.has(row.id)) filterList.set(row.id, row)
-        if (!row) return
-        Helper.appendFilter(row)
+        if (!filterList.has(row.id)) filterList.set(row.id, row);
+        if (!row) return;
+        Helper.appendFilter(row);
       })
-      $('.section_filterList ul').css({"opacity": 1})
-      $('.section_filterList .loader').hide()
-    })
+      $('.section_filterList ul').css({"opacity": 1});
+      $('.section_filterList .loader').hide();
+    });
+
   })
 
   $(document)

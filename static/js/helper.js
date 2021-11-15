@@ -23,13 +23,12 @@ const appendFilter = (filter) => {
   let highlight = false;
   const filterId = filter.id;
 
-  if (clientVars.padId !== clientVars.padView) {
-    const activatedSlug = location.pathname.split('/');
-    highlight = activatedSlug.includes(filter.slug);
-    active = activatedSlug.includes(filter.slug);
-  }
+  const activatedSlug = location.pathname.split('/');
+  highlight = activatedSlug.includes(filter.slug);
+  active = activatedSlug.includes(filter.slug);
 
   if (!filterList.has(filterId)) filterList.set(filterId, filter);
+
   const newFilter = $('#filter_listItem').tmpl({
     filter: filterList.get(filterId),
     active,
