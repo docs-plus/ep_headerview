@@ -534,7 +534,7 @@ exports.postAceInit = (hookName, context) => {
     if (currentPath[0] === '' && currentPath[1] === '') currentPath.shift()
     const targetPath = currentPath.join('/');
 
-    window.history.pushState({type: "filter", filter, filterList: Array.from(filterList.values()), targetPath }, filter.name)
+    window.history.pushState({type: "filter", filter, filterList: Array.from(filterList.values()), targetPath, target: "filter" }, filter.name)
     Helper.filterRowActivation(this, "active");
     applyFilter(filter, targetPath);
   })
@@ -542,7 +542,7 @@ exports.postAceInit = (hookName, context) => {
   const applyFilter = (filter = {}, targetPath) => {
     const filters = Array.from(filterList.values());
     window.softReloadLRHAttributes();
-    window.history.pushState({type: "filter", filter, filterList: filters, targetPath }, document.title, targetPath);
+    window.history.pushState({type: "filter", filter, filterList: filters, targetPath, target: "filter" }, document.title, targetPath);
     filteredHeaders = [];
     includeSections = [];
     setTimeout(() => {
