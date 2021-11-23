@@ -556,11 +556,11 @@ exports.postAceInit = (hookName, context) => {
   document.addEventListener('onPushState', (event) => {
     const {state} =  event.detail;
     if(state.type === "hyperLink"){
-      const href= state.href;
+      const href = state.href;
       let targetPath = new URL(href);
       targetPath = targetPath.pathname;
       if(!targetPath) return;
-      Helper.innerSkeleton("show");
+      if(state.target && state.target === "filter") Helper.innerSkeleton("show");
       if(filterList.size === 0){
         socket.emit('getFilterList', clientVars.padId, (list) => {
           list.forEach(filter => {
