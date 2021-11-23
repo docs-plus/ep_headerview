@@ -29,7 +29,7 @@ exports.clientVars = (hook, context, callback) => {
 const db = require('./server/dbRepository');
 
 exports.expressCreateServer = (hookName, args, callback) => {
-  args.app.get('/ep_headerview/:padId', async (req, res) => {
+  args.app.get('/pluginfw/ep_headerview/:padId', async (req, res) => {
     const {padId} = req.params;
     let filters = await db.getFilterList(`filters:${padId}`)
         .catch((error) => {
