@@ -211,9 +211,9 @@ const innerSkeleton = (action) => {
   if (action === 'append' && !aceInner.find('#editorSkeletonWrapper').length) {
     aceInner.append(innerSkeletonHtml);
   } else if (action === 'show') {
-    aceInner.find('#editorSkeletonWrapper').show();
+    aceInner.find('#editorSkeletonWrapper').fadeIn(500);
   } else {
-    aceInner.find('#editorSkeletonWrapper').hide();
+    aceInner.find('#editorSkeletonWrapper').fadeOut(600);
   }
 };
 

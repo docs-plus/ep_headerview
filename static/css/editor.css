@@ -62,19 +62,24 @@ div.ace-line {
 #editorSkeleton .paragraph .line.header {
   width: 45%;
   background-color: #ccc;
-  background-image: linear-gradient(90deg, #ccc 0px, #e8e8e8 40px, #ccc 80px);
   height: 20px;
   margin-bottom: 10px;
+  position: relative;
+  overflow: hidden;
 }
 
-@keyframes shine-lines {
-  0% {
-    background-position: -100px;
-  }
-  40%,
-  100% {
-    background-position: 140px;
-  }
+#editorSkeleton .paragraph .line.header::after {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  transform: translateX(-10%);
+  background-image: linear-gradient(to right, transparent 0%, #f1f1f196 50%, transparent 60%);
+  animation: shimmer 1.1s infinite ease-in-out;
+  content: '';
+  background-size: 100px;
+  background-repeat: no-repeat;
 }
 
 #filterLoader {
@@ -380,11 +385,36 @@ li .filter_undo button {
   content: "";
   height: 16px;
   border-radius: 4px;
-  background-image: linear-gradient(90deg, #ddd 0px, #e8e8e8 40px, #ddd 80px);
-  background-size: 600px;
-  animation: shine-lines 1.6s infinite linear;
   background-color: #ddd;
   display: block;
+  position: relative;
+  overflow: hidden;
+}
+
+#editorSkeleton .paragraph .line::after,
+.section_filterList .loader .line::after,
+.section_filterList .loader .box::after {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  transform: translateX(-10%);
+  background-image: linear-gradient(to right, transparent 0%, #f1f1f196 50%, transparent 60%);
+  animation: shimmer 1.1s infinite ease-in-out;
+  content: '';
+  background-size: 100px;
+  background-repeat: no-repeat;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(0);
+  }
+  60%,
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 .section_filterList .loader .line.name {
