@@ -63,7 +63,6 @@ const adoptFilterModalPosition = () => {
 };
 
 const closeOpenFilterModal = () => {
-  console.log('alskd;lak999i98');
   $('#filterModal').toggleClass('popup-show');
 };
 
@@ -96,7 +95,6 @@ const doesFilterExist = (inputFilterVal) => {
 const doesFilterUrlExist = (slug) => {
   const filters = Array.from(filterList.values());
   const path = `${location.pathname}/${slug}`;
-  console.log(path, filters.find((e) => path === e.path));
   return filters.length <= 0 ? false : !!filters.find((e) => path === e.path);
 };
 
@@ -108,7 +106,6 @@ const evaluateSearchResult = (value, callback) => {
 
   const filterURl = $('#filter_url').val();
 
-  console.log(doesFilterExist(value), doesFilterUrlExist(filterURl), '=-==28756789uh');
   if (doesFilterExist(value) && doesFilterUrlExist(filterURl)) {
     $('.btn_createFilter').removeClass('active').attr('disabled', true);
     console.info('[headerview]: filter is exists! try andother filter name');

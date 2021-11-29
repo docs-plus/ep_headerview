@@ -40,12 +40,16 @@ const createNewFilter = () => {
     return false
   }
 
+  let targetPath = `${location.pathname}/${filterUrl}`;
+  // singele pad
+  if(location.pathname == '/') targetPath = `/${filterUrl}`;
+
   const filter = {
     name: filterName,
     id: filterId,
     slug: filterUrl,
     root: location.pathname,
-    path: `${location.pathname}/${filterUrl}`,
+    path: targetPath,
     prevPath: prevPath.join('/'),
     url: urlPrefix
   }
@@ -259,7 +263,7 @@ exports.postAceInit = (hookName, context) => {
 
     let currentPath = location.pathname.split('/');
     if(locationPath) currentPath = locationPath.split('/');
-    let filterURL = [...currentPath].splice((Helper.doesHaveP() ? 3 : 2), currentPath.length - 1)
+    let filterURL = [...currentPath].splice((Helper.doesHaveP() ? 3 : 2), currentPath.length - 1);
 
     // console.info('[headerview]: filterURL', filterURL.length, currentPath, clientVars.ep_singlePad.active)
 
@@ -269,7 +273,9 @@ exports.postAceInit = (hookName, context) => {
       const doesUrlHavePadId = filterURL.indexOf(clientVars.padId) >= 0
 
       // /p/padName/slug = ["", "p","padName","slug"] OR /padName/slug = ["", "padName", slug]
-      if (Helper.doesHaveP() || doesUrlHavePadId) { filterURL = [...currentPath].splice((Helper.doesHaveP() ? 3 : 2), currentPath.length - 1) } else filterURL.shift() // /slug = ["", "slug"]
+      if (Helper.doesHaveP() || doesUrlHavePadId) {
+         filterURL = [...currentPath].splice((Helper.doesHaveP() ? 3 : 2), currentPath.length - 1)
+      } else filterURL.shift() // /slug = ["", "slug"]
 
       // in development mode
       if (doesUrlHavePadId) filterURL = filterURL.filter(x => x !== clientVars.padId)
@@ -277,7 +283,7 @@ exports.postAceInit = (hookName, context) => {
 
     console.info('[headerview]: filterURL', filterURL, filterURL.indexOf(clientVars.padId))
 
-    if(filterURL.length === 0){
+    if(filterURL.length === 0 || filterURL[0] == ''){
       // clear css filter
       $bodyAceOuter()
         .find('iframe')
