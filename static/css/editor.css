@@ -381,7 +381,7 @@ li .filter_undo button {
 #editorSkeleton .paragraph .line,
 .section_filterList .loader .line,
 .section_filterList .loader .box::after,
-.section_filterList .loader .box::before {
+.section_filterList .loader .box::after {
   content: "";
   height: 16px;
   border-radius: 4px;
@@ -432,11 +432,6 @@ li .filter_undo button {
   margin-left: 18px;
 }
 
-.section_filterList .loader .box.action::before {
-  height: 16px;
-  width: 20px;
-  margin-right: 3px;
-}
 .section_filterList .loader .box.action::after {
   height: 16px;
   width: 20px;
