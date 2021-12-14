@@ -380,6 +380,7 @@ li .filter_undo button {
 
 #editorSkeleton .paragraph .line,
 .section_filterList .loader .line,
+.section_filterList .loader .box,
 .section_filterList .loader .box::after,
 .section_filterList .loader .box::after {
   content: "";
@@ -427,13 +428,7 @@ li .filter_undo button {
 }
 
 .section_filterList .loader .box.action {
-  display: flex;
-  align-items: center;
-  margin-left: 18px;
-}
-
-.section_filterList .loader .box.action::after {
   height: 16px;
-  width: 20px;
-  margin-left: 3px;
+  width: 28px;
+  margin-left: 14px;
 }
