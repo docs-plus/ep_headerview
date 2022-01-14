@@ -146,9 +146,13 @@ div.ace-line {
   overflow: visible;
 }
 
+#filterModal{
+  right: 0;
+  width: 430px;
+}
 
 .filterModal-popup {
-  width: 430px;
+  width: 100%;
   min-height: 160px;
   padding: 15px;
   background-color: #fff;
@@ -157,7 +161,6 @@ div.ace-line {
   font-family: Quicksand, Roboto, RobotoDraft, Helvetica, Arial, sans-serif;
   box-shadow: 0 0 0 1px rgb(99 114 130 / 16%), 0 8px 16px rgb(27 39 51 / 8%);
   overflow: auto;
-  margin: 0 !important;;
 }
 
 .modal_filter.active {
