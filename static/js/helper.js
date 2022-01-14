@@ -118,9 +118,9 @@ const evaluateSearchResult = (value, callback) => {
   }
 
   if (results.length) {
-    $('.btn_createFilter').attr('disabled', false).addClass('active');
+    $('.btn_createFilter').removeAttr('disabled').addClass('active');
   } else {
-    $('.btn_createFilter').removeAttr('disabled').removeClass('active');
+    $('.btn_createFilter').attr('disabled', true).removeClass('active');
   }
 
   $('.filterNumResults').text(results.length);
