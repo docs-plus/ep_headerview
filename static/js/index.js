@@ -114,7 +114,7 @@ const eventListner = () => {
   $(document).on('click', '.btn_createFilter', createNewFilter);
 
   $(document).on('click', 'button#btn_filterView', (e) => {
-    displayFilterModal()
+    displayFilterModal();
     $('.section_filterList .loader').show();
     $('.section_filterList ul').css({"opacity": 0});
 
@@ -513,6 +513,11 @@ exports.postAceInit = (hookName, context) => {
 
     if (callback) callback();
   }
+
+  $(document).on('click', '.section_filterList ul li .filter_name', function() {
+    $(this).closest('li')
+      .find('.btn_filter_act').trigger('click');
+  });
 
   $(document).on('click', '.btn_filter_act[active="true"]', function () {
     Helper.innerSkeleton("show");
