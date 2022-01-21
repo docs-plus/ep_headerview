@@ -640,6 +640,7 @@ exports.postAceInit = (hookName, context) => {
 }
 
 const displayFilterModal = () => {
-  Helper.adoptFilterModalPosition()
-  Helper.closeOpenFilterModal()
+  Helper.closeOpenFilterModal(()=>{
+    Helper.adoptFilterModalPosition();
+  });
 }

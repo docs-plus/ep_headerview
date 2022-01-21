@@ -62,13 +62,14 @@ const adoptFilterModalPosition = () => {
   $('#filterModal').css({left: (pos.left - (modalWith + btnFilterWith)) + 20});
 };
 
-const closeOpenFilterModal = () => {
+const closeOpenFilterModal = (cb) => {
   $('#filterModal').toggleClass('popup-show');
 
-  // if open modal, focus on the filter input
+  // if open modal, focus in to the filter input
   if($('#filterModal').hasClass('popup-show')){
-    $(".modal_filter input#filter_name").focus().select();
+    setTimeout(() => $(".modal_filter input#filter_name").focus().select(), 500);
   }
+  if(cb) cb();
 };
 
 const doesFilterExist = (inputFilterVal) => {
