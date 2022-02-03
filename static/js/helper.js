@@ -59,7 +59,7 @@ const adoptFilterModalPosition = () => {
   const pos = $('button#btn_filterView').offset();
   const modalWith = $('.modal_filter').outerWidth(true);
   const btnFilterWith = $('button#btn_filterView').outerWidth(true);
-  $('#filterModal').css({left: (pos.left - (modalWith + btnFilterWith)) + 20});
+  $('#filterModal').css({top: pos.top + 30, left: (pos.left - (modalWith + btnFilterWith)) + 10});
 };
 
 const closeOpenFilterModal = (cb) => {

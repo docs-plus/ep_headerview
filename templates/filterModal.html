@@ -1,13 +1,5 @@
-<!-- Popup displayed so that we can create a link -->
-<script id="filterPopupTemplate" type="text/html">
-  <div id="filterModal" class="popup toolbar-popup">
-      <div class="popup-content filterModal-popup">
-          {{tmpl "#filterModalBox"}}
-      </div>
-  </div>
-</script>
 
-<script id="filterModalBox" type="text/html">
+<div id="filterModal" class="">
   <div class="modal_filter">
     <div class="modal_header">
       <p class="title">Filters</p>
@@ -75,8 +67,7 @@
     </div>
 
   </div>
-
-</script>
+</div>
 
 <script id="filter_listItem" type="text/html">
   <div active="${active}" highlight="${highlight}">

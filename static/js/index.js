@@ -223,7 +223,6 @@ const eventListner = () => {
 
 exports.postAceInit = (hookName, context) => {
   clientVars.ep_headerview = {};
-  Helper.insterFilterModal();
   initSocket();
   appendCustomStyleTag();
   eventListner();
