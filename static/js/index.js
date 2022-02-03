@@ -22,7 +22,9 @@ const clearFilterListSection = () => {
   $('.section_filterList ul').append('<li class="filterEmpty"><p>There is no filter <br> create the first filter</p></li>')
 }
 
-const createNewFilter = () => {
+const createNewFilter = (e) => {
+  e.preventDefault();
+  e.stopPropagation();
   const filterName = $('#filter_name').val()
   const filterUrl = $('#filter_url').val()
 
@@ -112,6 +114,7 @@ const eventListner = () => {
   $(window).resize(_.debounce(Helper.adoptFilterModalPosition, 250))
 
   $(document).on('click', '.btn_createFilter', createNewFilter);
+  $(document).on('submit', '#epFilterForm', createNewFilter)
 
   $(document).on('click', 'button#btn_filterView', (e) => {
     displayFilterModal();
