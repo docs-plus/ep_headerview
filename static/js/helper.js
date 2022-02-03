@@ -66,10 +66,10 @@ const closeOpenFilterModal = (cb) => {
   $('#filterModal').toggleClass('popup-show');
 
   // if open modal, focus in to the filter input
-  if($('#filterModal').hasClass('popup-show')){
-    setTimeout(() => $(".modal_filter input#filter_name").focus().select(), 500);
+  if ($('#filterModal').hasClass('popup-show')) {
+    setTimeout(() => $('.modal_filter input#filter_name').focus().select(), 500);
   }
-  if(cb) cb();
+  if (cb) cb();
 };
 
 const doesFilterExist = (inputFilterVal) => {
