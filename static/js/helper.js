@@ -235,6 +235,38 @@ const insterFilterModal = () => {
 };
 
 
+const getPadSlugs = () => {
+  let currentPath = location.pathname.split('/');
+  if (history && history.targetPath) currentPath = history.targetPath.split('/');
+
+  // ["", "p", "padName", slug]
+  // ["", "padName", slug]
+  // ["", slug]
+
+  // result => ["", "p", "padName"] or ["", "padName"] or [""]
+  let padMainAddress = [...currentPath];
+  if (padMainAddress.indexOf('p') > 0) {
+    padMainAddress = padMainAddress.splice(0, 3);
+  } else if (padMainAddress[1] === clientVars.padId) {
+    padMainAddress = padMainAddress.splice(0, 2);
+  } else if (clientVars.ep_singlePad.active && !(padMainAddress.indexOf('p') > 0) || padMainAddress[1] !== clientVars.padId) {
+    padMainAddress = [''];
+  }
+
+  // result => ["slug-1", "slug-2"]
+  const padSlugs = [...currentPath];
+  if (padSlugs[0].length === 0) padSlugs.shift();
+  if (padSlugs[0] === 'p') padSlugs.shift();
+  if (!clientVars.ep_singlePad.active || padSlugs[0] === clientVars.ep_singlePad.padId) {
+    padSlugs.shift();
+  }
+
+  // result => [""]
+  if (padSlugs[0] === '') padSlugs.shift();
+  return padSlugs;
+};
+
+
 module.exports = {
   removeFilter,
   appendFilter,
@@ -249,6 +281,7 @@ module.exports = {
   filterRowActivation,
   insterFilterModal,
   closeOpenFilterModal,
+  getPadSlugs,
 
 
 };

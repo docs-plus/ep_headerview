@@ -2,6 +2,8 @@
 
 const eejs = require('ep_etherpad-lite/node/eejs/');
 const packageJson = require('./package.json');
+const randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
+
 
 exports.eejsBlock_styles = (hook_name, args, cb) => {
   args.content += "<link href='../static/plugins/ep_headerview/static/css/editor.css' rel='stylesheet'>";
@@ -28,16 +30,55 @@ exports.clientVars = (hook, context, callback) => {
 
 const db = require('./server/dbRepository');
 
-exports.expressCreateServer = (hookName, args, callback) => {
-  args.app.get('/pluginfw/ep_headerview/:padId', async (req, res) => {
-    const {padId} = req.params;
-    let filters = await db.getFilterList(`filters:${padId}`)
+const getFilters = async (padId, padSlugs) => {
+  let filters = await db.getFilterList(`filters:${padId}`)
+      .catch((error) => {
+        console.error('[headerview]: ', error);
+      });
+  if (!filters) filters = [];
+  filters = filters.filter((x) => x != null);
+
+  const notExistsSlug = [];
+
+  padSlugs.forEach((slug) => {
+    if (!filters.find((x) => x && x.slug === slug)) {
+      notExistsSlug.push(slug);
+    }
+  });
+
+  await Promise.all(notExistsSlug.map(async (slug) => {
+    const newFilter = {
+      name: slug,
+      slug,
+      id: randomString(16),
+    };
+    const key = `filters:${padId}:${newFilter.id}`;
+    console.log('new filter', newFilter, key);
+    console.info('Add new Filter', key, newFilter);
+    await db.set(key, newFilter)
         .catch((error) => {
           console.error('[headerview]: ', error);
-          callback(false);
+        });
+  }));
+  // if new filter added to list
+  if (notExistsSlug.length > 0) {
+    filters = await db.getFilterList(`filters:${padId}`)
+        .catch((error) => {
+          console.error('[headerview]: ', error);
         });
     if (!filters) filters = [];
     filters = filters.filter((x) => x != null);
+  }
+
+  return filters;
+};
+
+exports.expressCreateServer = (hookName, args, callback) => {
+  args.app.get('/pluginfw/ep_headerview/:padId', async (req, res) => {
+    let {slugs} = req.query;
+    slugs = slugs.split(',');
+    const {padId} = req.params;
+    const filters = await getFilters(padId, slugs);
     res.json({message: true, filters});
   });
   return callback();
@@ -71,15 +112,10 @@ exports.socketio = (hookName, args, cb) => {
       callback(true);
     });
 
-    socket.on('getFilterList', async (padId, callback) => {
+
+    socket.on('getFilterList', async (padId, padSlugs, callback) => {
       socket.join(padId);
-      let filters = await db.getFilterList(`filters:${padId}`)
-          .catch((error) => {
-            console.error('[headerview]: ', error);
-            callback(false);
-          });
-      if (!filters) filters = [];
-      filters = filters.filter((x) => x != null);
+      const filters = await getFilters(padId, padSlugs);
       callback(filters);
     });
   });

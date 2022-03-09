@@ -121,7 +121,7 @@ const eventListner = () => {
     $('.section_filterList .loader').show();
     $('.section_filterList ul').css({"opacity": 0});
 
-    socket.emit('getFilterList', clientVars.padId, (list) => {
+    socket.emit('getFilterList',clientVars.padId, Helper.getPadSlugs(), (list) => {
       clearFilterListSection();
       clientVars.ep_headerview.filterList = list;
       list.forEach((row) => {
@@ -575,7 +575,7 @@ exports.postAceInit = (hookName, context) => {
       if(!targetPath) return;
       if(state.target && state.target === "filter") Helper.innerSkeleton("show");
       if(filterList.size === 0){
-        socket.emit('getFilterList', clientVars.padId, (list) => {
+        socket.emit('getFilterList',clientVars.padId, Helper.getPadSlugs(), (list) => {
           list.forEach(filter => {
             if (!filterList.has(filter.id)) filterList.set(filter.id, filter)
           });
@@ -592,46 +592,18 @@ exports.postAceInit = (hookName, context) => {
 
     setTimeout(() => {
       Helper.updateHeaderList((headerContetnts) => {
-        socket.emit('getFilterList', clientVars.padId, (list) => {
+        socket.emit('getFilterList', clientVars.padId, Helper.getPadSlugs(), (list) => {
+
           list.forEach(filter => {
             if (!filterList.has(filter.id)) filterList.set(filter.id, filter)
           })
 
           const slug = location.pathname.split('/').pop()
           const filter = list.find((x) => x.slug === slug)
-          // if filter does not exist, create a new filter
-          if (!filter) {
-            const filterId = randomString()
-            const currentPath = location.pathname.split('/')
-            const path = location.pathname
-            const urlPrefix = path.split('/').splice((Helper.doesHaveP() ? 3 : 2), currentPath.length - 1)
-            const prevPath = path.split('/')
-            prevPath.pop()
 
-            if (urlPrefix.length === 0) return false
+          window.history.pushState({type: "filter", filter, filterList: list }, document.title)
+          appendCssFilter();
 
-            const filter = {
-              name: clientVars.padName,
-              id: filterId,
-              slug: slugify([...currentPath].pop()),
-              root: location.pathname,
-              path: `${location.pathname}`,
-              prevPath: prevPath.join('/'),
-              url: urlPrefix
-            }
-
-            console.info('[headerview]: create filter: ', filter)
-
-            filterList.set(filter.id, filter)
-
-            socket.emit('addNewFilter', clientVars.padId, filter, (res) => {
-              window.history.pushState({type: "filter", filter, filterList: list }, document.title)
-              appendCssFilter();
-            })
-          } else {
-            window.history.pushState({type: "filter", filter, filterList: list }, document.title)
-            appendCssFilter();
-          }
         })
       })
     }, 1000);
