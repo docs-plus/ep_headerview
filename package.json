@@ -43,9 +43,6 @@
       "/static/js/slugify.js"
     ]
   },
-  "peerDependencies": {
-    "ep_etherpad-lite": ">=1.8.14"
-  },
   "dependencies": {
     "slugify": "^1.5.3",
     "underscore": "^1.13.1"

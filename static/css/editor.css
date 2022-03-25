@@ -119,7 +119,7 @@ div.ace-line {
 
 /**/
 
-#btn_filterView {
+#btn_filterView, #btnOpenFilterModal {
   width: 28px;
   height: 28px;
   padding: 0;
@@ -128,15 +128,15 @@ div.ace-line {
   justify-content: center;
   align-items: center;
 }
-#btn_filterView svg {
+#btn_filterView svg, #btnOpenFilterModal svg {
   fill: #576273;
   width: 14px;
   height: auto;
 }
-#btn_filterView.active {
+#btn_filterView.active, #btnOpenFilterModal.active {
   background-color: #576273;
 }
-#btn_filterView.active svg {
+#btn_filterView.active svg, #btnOpenFilterModal.active svg {
   fill: #fff;
 }
 

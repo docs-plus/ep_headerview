@@ -1,73 +1,76 @@
+<script id="filterViewTemplate" type="text/html">
+  <div id="filterModal" class="">
+    <div class="modal_filter">
+      <div class="modal_header">
+        <p class="title">Filters</p>
 
-<div id="filterModal" class="">
-  <div class="modal_filter">
-    <div class="modal_header">
-      <p class="title">Filters</p>
-
-      <button class="btn_closeModal"><i class="buttonicon buttonicon-times"></i></button>
-    </div>
-
-    <div class="section_filterList" style="position: relative;">
-      <div class="loader">
-        <div class="row">
-          <div class="line name"></div>
-          <div class="line filter"></div>
-          <div class="box action"></div>
-        </div>
-        <div class="row">
-          <div class="line name"></div>
-          <div class="line filter"></div>
-          <div class="box action"></div>
-        </div>
-        <div class="row">
-          <div class="line name"></div>
-          <div class="line filter"></div>
-          <div class="box action"></div>
-        </div>
-        <div class="row">
-          <div class="line name"></div>
-          <div class="line filter"></div>
-          <div class="box action"></div>
-        </div>
-        <div class="row">
-          <div class="line name"></div>
-          <div class="line filter"></div>
-          <div class="box action"></div>
-        </div>
+        <button class="btn_closeModal"><i class="buttonicon buttonicon-times"></i></button>
       </div>
 
-      <ul>
-        <li class="filterEmpty">
-          <p>There is no filter <br> create the first filter</p>
-        </li>
-      </ul>
-    </div>
-
-    <div class="section_form">
-      <form id="epFilterForm">
-        <p class="title">Create Filter</p>
-        <div class="form_inputs">
-          <label for="filter_name" class="inputs_label">Filter</label>
-          <input type="text" name="filter_name" value="" id="filter_name" >
-        </div>
-        <div class="form_inputs">
-          <label for="filter_url" class="inputs_label">URL</label>
-          <div style="display:flex; align-items: center;width: 100%;">
-            <span class="filter_urlPrefix" style="margin-right: 14px;font-size: 0.92rem;font-weight: 600; text-decoration: underline;"></span>
-            <input type="text" name="filter_url" style="color:#ccc" placeholder="(autofill)"  id="filter_url">
+      <div class="section_filterList" style="position: relative;">
+        <div class="loader">
+          <div class="row">
+            <div class="line name"></div>
+            <div class="line filter"></div>
+            <div class="box action"></div>
+          </div>
+          <div class="row">
+            <div class="line name"></div>
+            <div class="line filter"></div>
+            <div class="box action"></div>
+          </div>
+          <div class="row">
+            <div class="line name"></div>
+            <div class="line filter"></div>
+            <div class="box action"></div>
+          </div>
+          <div class="row">
+            <div class="line name"></div>
+            <div class="line filter"></div>
+            <div class="box action"></div>
+          </div>
+          <div class="row">
+            <div class="line name"></div>
+            <div class="line filter"></div>
+            <div class="box action"></div>
           </div>
         </div>
-        <div class="form_bottom">
-          <p style="color: #ccc;">
-            <span><span class="filterNumResults">0</span> / <span class="totalHeader">0</span></span> Headings
-          </p>
-          <button class="btn_createFilter" disabled="true">Create</button>
-        </div>
-      </form>
-    </div>
 
+        <ul>
+          <li class="filterEmpty">
+            <p>There is no filter <br> create the first filter</p>
+          </li>
+        </ul>
+      </div>
+
+      <div class="section_form">
+        <form id="epFilterForm">
+          <p class="title">Create Filter</p>
+          <div class="form_inputs">
+            <label for="filter_name" class="inputs_label">Filter</label>
+            <input type="text" name="filter_name" value="" id="filter_name" >
+          </div>
+          <div class="form_inputs">
+            <label for="filter_url" class="inputs_label">URL</label>
+            <div style="display:flex; align-items: center;width: 100%;">
+              <span class="filter_urlPrefix" style="margin-right: 14px;font-size: 0.92rem;font-weight: 600; text-decoration: underline;"></span>
+              <input type="text" name="filter_url" style="color:#ccc" placeholder="(autofill)"  id="filter_url">
+            </div>
+          </div>
+          <div class="form_bottom">
+            <p style="color: #ccc;">
+              <span><span class="filterNumResults">0</span> / <span class="totalHeader">0</span></span> Headings
+            </p>
+            <button class="btn_createFilter" disabled="true">Create</button>
+          </div>
+        </form>
+      </div>
+
+    </div>
   </div>
-</div>
+</script>
+
+
 
 <script id="filter_listItem" type="text/html">
   <div active="${active}" highlight="${highlight}">

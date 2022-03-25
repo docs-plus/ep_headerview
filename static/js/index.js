@@ -228,6 +228,20 @@ exports.postAceInit = (hookName, context) => {
   eventListner();
   Helper.innerSkeleton("append");
 
+
+  if($('body').hasClass('mobileView')) {
+    $("#tableOfContentsModal .header .menue").append(`
+      <button id="btnOpenFilterModal">
+        <svg width="394pt" height="394pt" viewBox="-5 0 394 394">
+          <path d="m367.82 0h-351.26c-6.1992-0.011719-11.879 3.4492-14.711 8.9609-2.8711 5.5859-2.3672 12.312 1.3008 17.414l128.69 181.29c0.042968 0.0625 0.089843 0.12109 0.13281 0.18359 4.6758 6.3125 7.207 13.961 7.2188 21.816v147.8c-0.027344 4.375 1.6914 8.582 4.7734 11.688 3.0859 3.1016 7.2812 4.8516 11.656 4.8516 2.2227-0.003906 4.4258-0.44531 6.4805-1.3008l72.312-27.57c6.4766-1.9805 10.777-8.0938 10.777-15.453v-120.02c0.011719-7.8555 2.543-15.504 7.2148-21.816 0.042968-0.0625 0.089844-0.12109 0.13281-0.18359l128.69-181.29c3.668-5.0977 4.1719-11.82 1.3008-17.406-2.8281-5.5156-8.5117-8.9766-14.707-8.9648z"></path>
+        </svg>
+      </button>
+    `)
+  } else {
+    const headerViewTemplate = $('#filterViewTemplate').tmpl();
+    $('body').append(headerViewTemplate)
+  }
+
   const createCssFilterForParentHeaders = (tagIndex, titleId, section, lrhSectionId) => {
     return `[sectionid='${lrhSectionId}'],[titleid='${titleId}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`
   }
@@ -515,6 +529,10 @@ exports.postAceInit = (hookName, context) => {
 
     if (callback) callback();
   }
+
+  $(document).on('click', '#btnOpenFilterModal', function () {
+    $('#filterHeadersModal').ndModal();
+  })
 
   $(document).on('click', '.section_filterList ul li .filter_name', function() {
     $(this).closest('li')
