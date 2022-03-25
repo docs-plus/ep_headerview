@@ -9,6 +9,7 @@ let {
   filterList,
   filteredHeaders
 } = require('./store')
+const { $ } = require('ep_etherpad-lite/static/js/rjquery')
 const $bodyAceOuter = () => $(document).find('iframe[name="ace_outer"]').contents()
 let socket
 
@@ -111,7 +112,9 @@ const appendCustomStyleTag = () => {
 
 const eventListner = () => {
 
-  $(window).resize(_.debounce(Helper.adoptFilterModalPosition, 250))
+  if($('body').hasClass('mobileView')){
+    $(window).resize(_.debounce(Helper.adoptFilterModalPosition, 250))
+  }
 
   $(document).on('click', '.btn_createFilter', createNewFilter);
   $(document).on('submit', '#epFilterForm', createNewFilter)
