@@ -112,7 +112,7 @@ const appendCustomStyleTag = () => {
 
 const eventListner = () => {
 
-  if($('body').hasClass('mobileView')){
+  if(!$('body').hasClass('mobileView')){
     $(window).resize(_.debounce(Helper.adoptFilterModalPosition, 250))
   }
 
