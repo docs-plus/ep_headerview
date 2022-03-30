@@ -5,12 +5,12 @@ const packageJson = require('./package.json');
 const randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
 
 
-exports.eejsBlock_styles = (hook_name, args, cb) => {
+exports.eejsBlock_styles = (hookName, args, cb) => {
   args.content += "<link href='../static/plugins/ep_headerview/static/css/editor.css' rel='stylesheet'>";
   return {};
 };
 
-exports.eejsBlock_scripts = (hook_name, args, cb) => {
+exports.eejsBlock_scripts = (hookName, args, cb) => {
   args.content += eejs.require('ep_headerview/templates/filterModal.html');
   return cb();
 };
@@ -20,7 +20,7 @@ exports.eejsBlock_editbarMenuRight = (hookName, args, cb) => {
   return cb();
 };
 
-exports.clientVars = (hook, context, callback) => {
+exports.clientVars = (hookName, context, callback) => {
   const result = {
     version: packageJson.version,
   };

@@ -455,3 +455,92 @@ li .filter_undo button {
   width: 28px;
   margin-left: 14px;
 }
+
+
+/*mobile view*/
+#filterHeadersModal .content {
+  height: 100%;
+    padding: 6px;
+}
+
+#filterHeadersModal .toolbar {
+  width: 94%;
+  padding: 0;
+  display: block;
+  border: 1px solid #007AFF!important;
+  border-radius: 6px;
+  overflow: hidden;
+  margin: 3%;
+}
+
+#filterHeadersModal .toolbar > button {
+  border: none;
+  background: #fff;
+  width: 50%;
+  float: left;
+  border-radius: 0;
+}
+
+#filterHeadersModal .toolbar > button.active{
+  background-color: #2678ff;
+  color: #fff;
+}
+
+#filterHeadersModal .addSections,
+#filterHeadersModal .filtersSection {
+  height: 60vh;
+  position: relative;
+  display: none;
+  padding: 16px 6px 0;
+}
+
+#filterHeadersModal .section_filterList{
+  height: 100%;
+}
+
+#filterHeadersModal .section_filterList ul {
+  max-height: 100%;
+}
+
+#filterHeadersModal .addSections.active,
+#filterHeadersModal .filtersSection.active {
+  display: block;;
+}
+
+#filterHeadersModal .addSections form {
+  width: 100%;
+  overflow: auto;
+  position: relative;
+  height: 100%;
+}
+
+#filterHeadersModal .btn_createFilter{
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  background: #cecece;
+  height: 50px;
+}
+
+#filterHeadersModal .btn_createFilter.active{
+  background: #007AFF;
+  color: #fff;
+}
+
+#filterHeadersModal .form_inputs {
+  margin-bottom: 20px;
+}
+
+#filterHeadersModal .form_inputs input[type="text"]{
+  display: block;
+  width: 100%;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 9px 13px;
+}
+
+#filterHeadersModal .form_inputs label {
+  display: block;
+  margin-bottom: 4px;
+}

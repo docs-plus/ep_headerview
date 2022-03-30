@@ -56,6 +56,7 @@ const appendFilter = (filter) => {
 };
 
 const adoptFilterModalPosition = () => {
+  if ($('body').hasClass('mobileView')) return;
   const pos = $('button#btn_filterView').offset();
   const modalWith = $('.modal_filter').outerWidth(true);
   const btnFilterWith = $('button#btn_filterView').outerWidth(true);
@@ -67,7 +68,7 @@ const closeOpenFilterModal = (cb) => {
 
   // if open modal, focus in to the filter input
   if ($('#filterModal').hasClass('popup-show')) {
-    setTimeout(() => $('.modal_filter input#filter_name').focus().select(), 500);
+    setTimeout(() => $('.section_filterList input#filter_name').focus().select(), 500);
   }
   if (cb) cb();
 };
@@ -171,7 +172,7 @@ const updateHeaderList = (callback, selectedSections = []) => {
     headerContetnts.push(result);
   });
 
-  $('.modal_filter .totalHeader').text(headerContetnts.length);
+  $('.section_filterList .totalHeader').text(headerContetnts.length);
 
   if (callback) callback(headerContetnts);
 };

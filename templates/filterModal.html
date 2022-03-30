@@ -70,7 +70,70 @@
   </div>
 </script>
 
-
+<script id="filterMobileView" type="text/html">
+  <div>
+    <div class="toolbar">
+      <button class="btnFiltersSection active">Filters</button>
+      <button class="btnAddsSection">Add</button>
+    </div>
+    <div class="filtersSection active">
+      <div class="section_filterList">
+        <div class="loader">
+          <div class="row">
+            <div class="line name"></div>
+            <div class="line filter"></div>
+            <div class="box action"></div>
+          </div>
+          <div class="row">
+            <div class="line name"></div>
+            <div class="line filter"></div>
+            <div class="box action"></div>
+          </div>
+          <div class="row">
+            <div class="line name"></div>
+            <div class="line filter"></div>
+            <div class="box action"></div>
+          </div>
+          <div class="row">
+            <div class="line name"></div>
+            <div class="line filter"></div>
+            <div class="box action"></div>
+          </div>
+          <div class="row">
+            <div class="line name"></div>
+            <div class="line filter"></div>
+            <div class="box action"></div>
+          </div>
+        </div>
+        <ul>
+          <li class="filterEmpty">
+            <p>There is no filter <br> create the first filter</p>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="addSections">
+      <div class="section_filterList">
+        <form id="epFilterForm">
+          <div class="form_inputs">
+            <label for="filter_name" class="inputs_label">Filter</label>
+            <input type="text" name="filter_name" value="" id="filter_name" >
+          </div>
+          <div class="form_inputs">
+            <label for="filter_url" class="inputs_label">Slug</label>
+            <input type="text" name="filter_url" style="color:#ccc" placeholder="(autofill)"  id="filter_url">
+          </div>
+          <div class="form_bottom">
+            <p style="color: #ccc;">
+              <span><span class="filterNumResults">0</span> / <span class="totalHeader">0</span></span> Headings
+            </p>
+            <button class="btn_createFilter" disabled="true">Create and apply</button>
+          </div>
+        </form>
+        </div>
+    </div>
+  </div>
+</script>
 
 <script id="filter_listItem" type="text/html">
   <div active="${active}" highlight="${highlight}">

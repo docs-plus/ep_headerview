@@ -119,7 +119,7 @@ const eventListner = () => {
   $(document).on('click', '.btn_createFilter', createNewFilter);
   $(document).on('submit', '#epFilterForm', createNewFilter)
 
-  $(document).on('click', 'button#btn_filterView', (e) => {
+  $(document).on('click', 'button#btn_filterView, button#btnOpenFilterModal', (e) => {
     displayFilterModal();
     $('.section_filterList .loader').show();
     $('.section_filterList ul').css({"opacity": 0});
@@ -139,12 +139,12 @@ const eventListner = () => {
   })
 
   $(document)
-    .on('click', 'button#btn_filterView, .modal_filter button.btn_closeModal', () => {
+    .on('click', 'button#btn_filterView, button#btnOpenFilterModal, .section_filterList button.btn_closeModal', () => {
       Helper.updateHeaderList(null, includeSections)
     });
 
   $(document)
-    .on('click', '.modal_filter button.btn_closeModal', () => Helper.closeOpenFilterModal());
+    .on('click', '.section_filterList button.btn_closeModal', () => Helper.closeOpenFilterModal());
 
   $(document).on('click', '.btn_filter_remove', function () {
     const filterId = $(this).attr('filter-id')
@@ -187,21 +187,21 @@ const eventListner = () => {
       .html(`<li class="row_${filterId}" active="${active}" highlight="${highlight}">${$(rowFilter).html()}</li>`)
   })
 
-  $('.modal_filter  input#filter_name')
-    .focusin(function () {
+  $(document)
+    .on('keyup input','.section_filterList input#filter_name', function () {
       const inputText = $(this).val()
-      $('.filterNumResults').addClass('active')
       Helper.searchResult(inputText)
+      if (inputText.length > 0) $('#filter_url').val(slugify(inputText, { lower: true, strict: true }))
     })
-    .focusout(function () {
+    .on('focusout input','.section_filterList input#filter_name', function () {
       const inputText = $(this).val()
       if (inputText.length > 0) $('#filter_url').val(slugify(inputText, { lower: true, strict: true }))
       $('.filterNumResults').removeClass('active')
     })
-    .keyup(function () {
+    .on('focusin input','.section_filterList input#filter_name', function (param) {
       const inputText = $(this).val()
+      $('.filterNumResults').addClass('active')
       Helper.searchResult(inputText)
-      if (inputText.length > 0) $('#filter_url').val(slugify(inputText, { lower: true, strict: true }))
     })
 
   $('#filter_url').focusout(function () {
@@ -240,10 +240,27 @@ exports.postAceInit = (hookName, context) => {
         </svg>
       </button>
     `)
+    const filterModal = $('#filterMobileView').tmpl()
+    $('#filterHeadersModal .content').append(filterModal)
   } else {
     const headerViewTemplate = $('#filterViewTemplate').tmpl();
     $('body').append(headerViewTemplate)
   }
+
+  $(document).on('touchstart click', '.btnFiltersSection', function() {
+    $(this).parent().find('button').removeClass('active')
+    $(this).addClass('active')
+    $('.addSections').hide()
+    $('.filtersSection').show()
+  })
+
+  $(document).on('touchstart click', '.btnAddsSection', function() {
+    $(this).parent().find('button').removeClass('active')
+    $(this).addClass('active')
+    $('.filtersSection').hide()
+    $('.addSections').show()
+    setTimeout(() => $('.addSections input#filter_name').focus().select(), 500);
+  })
 
   const createCssFilterForParentHeaders = (tagIndex, titleId, section, lrhSectionId) => {
     return `[sectionid='${lrhSectionId}'],[titleid='${titleId}'][lrh${tagIndex}='${section.lrhMark[tagIndex]}']`
