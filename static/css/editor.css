@@ -488,14 +488,16 @@ li .filter_undo button {
 
 #filterHeadersModal .addSections,
 #filterHeadersModal .filtersSection {
-  height: 60vh;
+  height: 80%;
   position: relative;
   display: none;
-  padding: 16px 6px 0;
+  padding: 0 6px 0;
 }
 
 #filterHeadersModal .section_filterList{
   height: 100%;
+  border:none;
+  margin: 0;
 }
 
 #filterHeadersModal .section_filterList ul {
