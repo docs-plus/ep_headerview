@@ -601,6 +601,25 @@ exports.postAceInit = (hookName, context) => {
         appendCssFilter(null, targetPath);
       });
     }, 500);
+
+    console.log(Helper.getPadSlugs(), targetPath)
+
+    if($('body').hasClass('mobileView')) {
+      const slugs = Helper.getPadSlugs()
+      if(slugs.length === 0) return;
+      let notify = $('body').find('.notify.filterApply');
+      if (notify.length === 0) {
+        notify = $('body').append(`
+        <div class="notify filterApply active">${slugs.length === 1 ? 'Filter': 'Filters'} applied</div>
+      `);
+      } else {
+        notify.fadeIn();
+      }
+      setTimeout(() => {
+        $('.notify.filterApply').fadeOut();
+      }, 5000);
+    }
+
   }
 
   // if history state has change fire joinQueryString
@@ -611,7 +630,9 @@ exports.postAceInit = (hookName, context) => {
       let targetPath = new URL(href);
       targetPath = targetPath.pathname;
       if(!targetPath) return;
+
       if(state.target && state.target === "filter") Helper.innerSkeleton("show");
+
       if(filterList.size === 0){
         socket.emit('getFilterList',clientVars.padId, Helper.getPadSlugs(), (list) => {
           list.forEach(filter => {
@@ -641,11 +662,9 @@ exports.postAceInit = (hookName, context) => {
 
           window.history.pushState({type: "filter", filter, filterList: list }, document.title)
           appendCssFilter();
-
         })
       })
     }, 1000);
-
   } else {
     Helper.innerSkeleton("hide");
   }
