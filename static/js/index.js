@@ -607,17 +607,17 @@ exports.postAceInit = (hookName, context) => {
     if($('body').hasClass('mobileView')) {
       const slugs = Helper.getPadSlugs()
       if(slugs.length === 0) return;
+
       let notify = $('body').find('.notify.filterApply');
-      if (notify.length === 0) {
-        notify = $('body').append(`
+      if(notify.length > 0) notify.remove();
+
+      $('body').append(`
         <div class="notify filterApply active">${slugs.length === 1 ? 'Filter': 'Filters'} applied</div>
       `);
-      } else {
-        notify.fadeIn();
-      }
+
       setTimeout(() => {
-        $('.notify.filterApply').fadeOut();
-      }, 5000);
+        $('.notify.filterApply').fadeOut().remove();
+      }, 6000);
     }
 
   }
