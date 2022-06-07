@@ -31,6 +31,7 @@ const createNewFilter = (e) => {
   const filterName = $('#filter_name').val();
   const filterUrl = $('#filter_url').val();
 
+  $('.section_filterList .loader').show();
 
   if (!filterName || !filterUrl) return false;
 
@@ -51,6 +52,7 @@ const createNewFilter = (e) => {
   // submit filter
   socket.emit('addNewFilter', clientVars.padId, filter, (res) => {
     Helper.appendFilter(res);
+    $('.section_filterList .loader').hide();
   });
 
   // clear form
