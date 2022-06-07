@@ -1,7 +1,6 @@
 'use strict';
 
 const _ = require('underscore');
-const slugify = require('./slugify');
 const {headerContetnts, filterList} = require('./store');
 const $bodyAceOuter = () => $(document).find('iframe[name="ace_outer"]').contents();
 const htags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
@@ -73,36 +72,9 @@ const closeOpenFilterModal = (cb) => {
   if (cb) cb();
 };
 
-const doesFilterExist = (inputFilterVal) => {
-  if (!inputFilterVal) return false;
-
-  const filterUrl =
-    inputFilterVal.length > 0
-      ? slugify(inputFilterVal, {lower: true, strict: true})
-      : '';
-
-  const currentPath = location.pathname.split('/');
-  const path = `${location.pathname}/${filterUrl}`;
-  const doesHaveP = location.pathname.split('/').indexOf('p') > 0;
-  const urlPrefix = path
-      .split('/')
-      .splice(doesHaveP ? 3 : 2, currentPath.length - 1);
-
+const doesSlugExist = (slug) => {
   const filters = Array.from(filterList.values());
-
-  const diffPass = `${doesHaveP ? '/p/' : ''}${
-    clientVars.padId
-  }/${urlPrefix.join('/')}`;
-
-  return filters.length <= 0
-    ? false
-    : !!filters.find((e) => diffPass === e.path);
-};
-
-const doesFilterUrlExist = (slug) => {
-  const filters = Array.from(filterList.values());
-  const path = `${location.pathname}/${slug}`;
-  return filters.length <= 0 ? false : !!filters.find((e) => path === e.path);
+  return filters.filter((x) => x.slug === slug).length ? true : false;
 };
 
 const evaluateSearchResult = (value, callback) => {
@@ -113,7 +85,7 @@ const evaluateSearchResult = (value, callback) => {
 
   const filterURl = $('#filter_url').val();
 
-  if (doesFilterExist(value) && doesFilterUrlExist(filterURl)) {
+  if (doesSlugExist(filterURl)) {
     $('.btn_createFilter').removeClass('active').attr('disabled', true);
     console.info('[headerview]: filter is exists! try andother filter name');
     return false;
@@ -237,6 +209,7 @@ const insterFilterModal = () => {
 
 
 const getPadSlugs = () => {
+  const isSinglePad = clientVars.ep_singlePad.active;
   let currentPath = location.pathname.split('/');
   if (history && history.targetPath) currentPath = history.targetPath.split('/');
 
@@ -246,11 +219,12 @@ const getPadSlugs = () => {
 
   // result => ["", "p", "padName"] or ["", "padName"] or [""]
   let padMainAddress = [...currentPath];
+  const padAddressHasP = padMainAddress.indexOf('p') > 0;
   if (padMainAddress.indexOf('p') > 0) {
     padMainAddress = padMainAddress.splice(0, 3);
   } else if (padMainAddress[1] === clientVars.padId) {
     padMainAddress = padMainAddress.splice(0, 2);
-  } else if (clientVars.ep_singlePad.active && !(padMainAddress.indexOf('p') > 0) || padMainAddress[1] !== clientVars.padId) {
+  } else if (isSinglePad && !padAddressHasP || padMainAddress[1] !== clientVars.padId) {
     padMainAddress = [''];
   }
 
@@ -272,8 +246,7 @@ module.exports = {
   removeFilter,
   appendFilter,
   adoptFilterModalPosition,
-  doesFilterExist,
-  doesFilterUrlExist,
+  doesSlugExist,
   evaluateSearchResult,
   searchResult,
   updateHeaderList,

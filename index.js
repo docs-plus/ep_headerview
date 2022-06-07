@@ -1,12 +1,13 @@
 'use strict';
 
 const eejs = require('ep_etherpad-lite/node/eejs/');
-const packageJson = require('./package.json');
 const randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
+const packageJson = require('./package.json');
 
 
 exports.eejsBlock_styles = (hookName, args, cb) => {
-  args.content += "<link href='../static/plugins/ep_headerview/static/css/editor.css' rel='stylesheet'>";
+  const cssAddress = '../static/plugins/ep_headerview/static/css/editor.css';
+  args.content += `<link href="${cssAddress}" rel='stylesheet'>`;
   return {};
 };
 
@@ -30,11 +31,22 @@ exports.clientVars = (hookName, context, callback) => {
 
 const db = require('./server/dbRepository');
 
-const getFilters = async (padId, padSlugs) => {
+const saveFilter = (key, val) => {
+  console.info('New Filter created', key, val);
+  return db.set(key, val)
+      .catch((error) => {
+        console.error('[headerview]: ', error);
+      });
+};
+
+const getFilters = async (padId, padSlugs = []) => {
   let filters = await db.getFilterList(`filters:${padId}`)
       .catch((error) => {
         console.error('[headerview]: ', error);
       });
+
+  if (padSlugs.length === 0 || !filters) return [];
+
   if (!filters) filters = [];
   filters = filters.filter((x) => x != null);
 
@@ -45,23 +57,19 @@ const getFilters = async (padId, padSlugs) => {
       notExistsSlug.push(slug);
     }
   });
+  // if new filter need to added to list
+  if (notExistsSlug.length) {
+    await Promise.all(notExistsSlug.map(async (slug) => {
+      if (slug.length === 0) return;
+      const newFilter = {
+        name: slug,
+        slug,
+        id: randomString(16),
+      };
+      const key = `filters:${padId}:${newFilter.id}`;
+      await saveFilter(key, newFilter);
+    }));
 
-  await Promise.all(notExistsSlug.map(async (slug) => {
-    const newFilter = {
-      name: slug,
-      slug,
-      id: randomString(16),
-    };
-    const key = `filters:${padId}:${newFilter.id}`;
-    console.log('new filter', newFilter, key);
-    console.info('Add new Filter', key, newFilter);
-    await db.set(key, newFilter)
-        .catch((error) => {
-          console.error('[headerview]: ', error);
-        });
-  }));
-  // if new filter added to list
-  if (notExistsSlug.length > 0) {
     filters = await db.getFilterList(`filters:${padId}`)
         .catch((error) => {
           console.error('[headerview]: ', error);
@@ -89,15 +97,10 @@ exports.socketio = (hookName, args, cb) => {
   io.on('connection', (socket) => {
     socket.on('addNewFilter', async (padId, filter, callback) => {
       const key = `filters:${padId}:${filter.id}`;
-      console.info('Add new Filter', key, filter);
-      await db.set(key, filter)
-          .catch((error) => {
-            console.error('[headerview]: ', error);
-            callback(false);
-          });
+
+      await saveFilter(key, filter);
 
       socket.broadcast.to(padId).emit('addNewFilter', filter);
-
       callback(filter);
     });
 
