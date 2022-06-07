@@ -45,8 +45,6 @@ const getFilters = async (padId, padSlugs = []) => {
         console.error('[headerview]: ', error);
       });
 
-  if (padSlugs.length === 0 || !filters) return [];
-
   if (!filters) filters = [];
   filters = filters.filter((x) => x != null);
 
@@ -109,7 +107,10 @@ exports.socketio = (hookName, args, cb) => {
           .filter((x) => x.slug === filter.slug)
           .length ? true : false;
 
-      if (doesExistFilter) return;
+      if (doesExistFilter) {
+        callback({});
+        return;
+      }
 
       await saveFilter(key, filter);
 

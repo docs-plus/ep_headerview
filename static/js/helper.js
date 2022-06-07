@@ -22,6 +22,9 @@ const appendFilter = (filter) => {
   let highlight = false;
   const filterId = filter.id;
 
+  // prevent display the filter that has not slug value
+  if (!(filter.slug && filter.slug.length)) return;
+
   const activatedSlug = location.pathname.split('/');
   highlight = activatedSlug.includes(filter.slug);
   active = activatedSlug.includes(filter.slug);
