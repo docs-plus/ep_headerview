@@ -98,6 +98,19 @@ exports.socketio = (hookName, args, cb) => {
     socket.on('addNewFilter', async (padId, filter, callback) => {
       const key = `filters:${padId}:${filter.id}`;
 
+      // prevent save duplicate filter with slug key
+      let filterWeHave = await db.getFilterList(`filters:${padId}`)
+          .catch((error) => {
+            console.error('[headerview]: ', error);
+          });
+      if (!filterWeHave) filterWeHave = [];
+
+      const doesExistFilter = filterWeHave
+          .filter((x) => x.slug === filter.slug)
+          .length ? true : false;
+
+      if (doesExistFilter) return;
+
       await saveFilter(key, filter);
 
       socket.broadcast.to(padId).emit('addNewFilter', filter);
@@ -114,7 +127,6 @@ exports.socketio = (hookName, args, cb) => {
       socket.broadcast.to(padId).emit('removeFilter', filter);
       callback(true);
     });
-
 
     socket.on('getFilterList', async (padId, padSlugs, callback) => {
       socket.join(padId);
