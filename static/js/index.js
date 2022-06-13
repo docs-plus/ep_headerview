@@ -260,6 +260,9 @@ exports.postAceInit = (hookName, context) => {
     const slugsScore = {};
     const sectionsContaintSlugs = [];
 
+    // If there were no filters in that list
+    // if (filterList.size === 0) return true;
+
     let currentPath = location.pathname.split('/');
     if (locationPath) currentPath = locationPath.split('/');
     let filterURL = [...currentPath].splice((Helper.doesHaveP() ? 3 : 2), currentPath.length - 1);
@@ -521,8 +524,6 @@ exports.postAceInit = (hookName, context) => {
         appendCssFilter(null, targetPath);
       });
     }, 500);
-
-    console.log(Helper.getPadSlugs(), targetPath);
 
     if ($('body').hasClass('mobileView')) {
       const slugs = Helper.getPadSlugs();

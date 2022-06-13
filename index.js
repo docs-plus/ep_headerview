@@ -31,6 +31,18 @@ exports.clientVars = (hookName, context, callback) => {
 
 const db = require('./server/dbRepository');
 
+const doesFilterExist = async (padId, filter) => {
+  let filterWeHave = await db.getFilterList(`filters:${padId}`)
+      .catch((error) => {
+        console.error('[headerview]: ', error);
+      });
+  if (!filterWeHave) filterWeHave = [];
+
+  return filterWeHave
+      .filter((x) => x.slug === filter)
+      .length ? true : false;
+};
+
 const saveFilter = (key, val) => {
   console.info('New Filter created', key, val);
   return db.set(key, val)
@@ -65,6 +77,10 @@ const getFilters = async (padId, padSlugs = []) => {
         id: randomString(16),
       };
       const key = `filters:${padId}:${newFilter.id}`;
+
+      // prevent save duplicate filter with slug key
+      if (await doesFilterExist(padId, newFilter)) return;
+
       await saveFilter(key, newFilter);
     }));
 
@@ -97,20 +113,7 @@ exports.socketio = (hookName, args, cb) => {
       const key = `filters:${padId}:${filter.id}`;
 
       // prevent save duplicate filter with slug key
-      let filterWeHave = await db.getFilterList(`filters:${padId}`)
-          .catch((error) => {
-            console.error('[headerview]: ', error);
-          });
-      if (!filterWeHave) filterWeHave = [];
-
-      const doesExistFilter = filterWeHave
-          .filter((x) => x.slug === filter.slug)
-          .length ? true : false;
-
-      if (doesExistFilter) {
-        callback({});
-        return;
-      }
+      if (await doesFilterExist(padId, filter)) return;
 
       await saveFilter(key, filter);
 
