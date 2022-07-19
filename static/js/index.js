@@ -330,18 +330,20 @@ exports.postAceInit = (hookName, context) => {
       slugsScore[slug].score = sumTagIndex / count;
     });
 
-    // console.info(`[headerview]: slugsScore`, slugsScore)
+    // console.info('[headerview]: slugsScore', slugsScore);
 
     // sort slug by score
     const sortedSlugs = slugsScoreKeys.sort((a, b) => slugsScore[a].score - slugsScore[b].score);
 
-    // console.info(`[headerview]: sortedSlugs`, sortedSlugs)
+    console.info('[headerview]: sortedSlugs', sortedSlugs);
 
     for (const [index, slug] of sortedSlugs.entries()) {
       const regEx = new RegExp(slugsScore[slug].text, 'gi');
+
       let results = [];
 
       if (bucketSearchResult.length === 0) {
+        // filter all header with given first filter
         results = headerContetnts.filter((x) => x.text.match(regEx));
         filteredHeaders.push(...results);
       } else {
@@ -350,9 +352,12 @@ exports.postAceInit = (hookName, context) => {
 
         let newBucketSearchResult = headerContetnts.filter((x) => titleIdList.includes(x.titleId));
 
-        if (!lrh1IdList.some((x) => x === undefined)) { newBucketSearchResult = headerContetnts.filter((x) => lrh1IdList.includes(x.lrh1)); }
 
-        results = newBucketSearchResult.filter((x) => x.text.match(x.text.match(regEx)));
+        if (!lrh1IdList.some((x) => x === undefined)) {
+          newBucketSearchResult = headerContetnts.filter((x) => lrh1IdList.includes(x.lrh1));
+        }
+
+        results = newBucketSearchResult.filter((x) => x.text.match(regEx));
         filteredHeaders.push(...results);
 
         if (index === sortedSlugs.length - 1) {
@@ -367,10 +372,13 @@ exports.postAceInit = (hookName, context) => {
       bucketSearchResult.push(...results);
     }
 
-    // console.info(`[headerview]: filteredHeaders,`, filteredHeaders)
+    // console.info('[headerview]: filteredHeaders,', filteredHeaders, 'filterIncludesSections', filterIncludesSections);
 
-    // filter by parent // limite the search result by title header Id
-    // I want this line
+    // ======================
+    // CREATE CSS FILTER BASED "filterIncludesSections" VARIABLE
+    // ======================
+
+    // filter with parent // limite the search result by title header Id
     const otherParentHeader = filteredHeaders.filter((x) => x.tag === 1).map((x) => x.titleId);
     if (filterURL.length > 1) filteredHeaders = filteredHeaders.filter((x) => otherParentHeader.includes(x.titleId));
 
@@ -379,6 +387,7 @@ exports.postAceInit = (hookName, context) => {
       for (const section of filteredHeaders) {
         const tagIndex = section.tag;
         const titleId = section.titleId;
+
         const includeParts = section.lrhMark
             .filter((x, lrnhIndex) => x && (lrnhIndex) <= tagIndex)
             .map((lrhSectionId) => createCssFilterForParentHeaders(tagIndex, titleId, section, lrhSectionId));
@@ -397,6 +406,7 @@ exports.postAceInit = (hookName, context) => {
         includeSections.push(...includeParts);
       }
     } else {
+      // If we have more than one active filter
       for (const section of filterIncludesSections) {
         const tagIndex = section.tag;
         const titleId = section.titleId;
@@ -409,9 +419,9 @@ exports.postAceInit = (hookName, context) => {
       }
     }
 
+    // console.log('[headerview]: includeSections', includeSections);
     const cssSectionSelecrots = includeSections.filter((x) => x && x).join(',');
 
-    // console.info(`[headerview]: cssSectionSelecrots,`, cssSectionSelecrots)
 
     css = `
         div.ace-line:is([tag="h1"],[tag="h2"],[tag="h3"],[tag="h4"],[tag="h5"],[tag="h6"]){
