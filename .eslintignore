@@ -1,1 +1,3 @@
 static/js/slugify.js
+static/dist/**/*.js
+rollup.config.js

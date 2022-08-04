@@ -1,23 +1,34 @@
-'use strict';
+import debounce from 'lodash-es/debounce';
+import {Store} from './store';
 
-const _ = require('underscore');
-const {headerContetnts, filterList} = require('./store');
-const $bodyAceOuter = () => $(document).find('iframe[name="ace_outer"]').contents();
 const htags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
 
+export const $bodyAceOuter = () => $(document).find('iframe[name="ace_outer"]').contents();
+
+export const randomString = (len) => {
+  const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+  let randomstring = '';
+  len = len || 20;
+  for (let i = 0; i < len; i++) {
+    const rnum = Math.floor(Math.random() * chars.length);
+    randomstring += chars.substring(rnum, rnum + 1);
+  }
+  return randomstring;
+};
+
 // remove filter from filter modal
-const removeFilter = (filter) => {
+export const removeFilter = (filter) => {
   $(`.section_filterList ul li.row_${filter.id}`).remove();
   if (!$('.section_filterList ul li').length) {
     $('.section_filterList ul').append(
         '<li class="filterEmpty"><p>There is no filter <br> create the first filter</p></li>'
     );
   }
-  filterList.delete(filter.id);
+  Store.filterList.delete(filter.id);
 };
 
 // add filter to filter modal
-const appendFilter = (filter) => {
+export const appendFilter = (filter) => {
   let active = false;
   let highlight = false;
   const filterId = filter.id;
@@ -29,10 +40,10 @@ const appendFilter = (filter) => {
   highlight = activatedSlug.includes(filter.slug);
   active = activatedSlug.includes(filter.slug);
 
-  if (!filterList.has(filterId)) filterList.set(filterId, filter);
+  if (!Store.filterList.has(filterId)) Store.filterList.set(filterId, filter);
 
   const newFilter = $('#filter_listItem').tmpl({
-    filter: filterList.get(filterId),
+    filter: Store.filterList.get(filterId),
     active,
     highlight,
   });
@@ -57,7 +68,7 @@ const appendFilter = (filter) => {
   }
 };
 
-const adoptFilterModalPosition = () => {
+export const adoptFilterModalPosition = () => {
   if ($('body').hasClass('mobileView')) return;
   const pos = $('button#btn_filterView').offset();
   const modalWith = $('.modal_filter').outerWidth(true);
@@ -65,7 +76,7 @@ const adoptFilterModalPosition = () => {
   $('#filterModal').css({top: pos.top + 30, left: (pos.left - (modalWith + btnFilterWith)) + 10});
 };
 
-const closeOpenFilterModal = (cb) => {
+export const closeOpenFilterModal = (cb) => {
   $('#filterModal').toggleClass('popup-show');
 
   // if open modal, focus in to the filter input
@@ -75,16 +86,16 @@ const closeOpenFilterModal = (cb) => {
   if (cb) cb();
 };
 
-const doesSlugExist = (slug) => {
-  const filters = Array.from(filterList.values());
+export const doesSlugExist = (slug) => {
+  const filters = Array.from(Store.filterList.values());
   return filters.filter((x) => x.slug === slug).length ? true : false;
 };
 
-const evaluateSearchResult = (value, callback) => {
+export const evaluateSearchResult = (value, callback) => {
   const val = value;
   if (!val || val.length <= 0) return false;
   const regEx = new RegExp(val, 'gi');
-  const results = headerContetnts.filter((x) => x.text.match(regEx)) || [];
+  const results = Store.headerContetnts.filter((x) => x.text.match(regEx)) || [];
 
   const filterURl = $('#filter_url').val();
 
@@ -105,7 +116,7 @@ const evaluateSearchResult = (value, callback) => {
   if (callback) callback(results);
 };
 
-const updateHeaderList = (callback, selectedSections = []) => {
+export const updateHeaderList = (callback, selectedSections = []) => {
   let headers;
 
   if (selectedSections.length) {
@@ -118,7 +129,7 @@ const updateHeaderList = (callback, selectedSections = []) => {
     headers = $bodyAceOuter().find('iframe').contents().find(':header');
   }
 
-  headerContetnts.splice(0, headerContetnts.length);
+  Store.headerContetnts.splice(0, Store.headerContetnts.length);
   headers.each(function () {
     const text = $(this).text();
     const $parent = $(this).parent();
@@ -144,19 +155,19 @@ const updateHeaderList = (callback, selectedSections = []) => {
       lrhMark: [lrh0, lrh1, lrh2, lrh3, lrh4, lrh5, lrh6],
     };
 
-    headerContetnts.push(result);
+    Store.headerContetnts.push(result);
   });
 
-  $('.section_filterList .totalHeader').text(headerContetnts.length);
+  $('.section_filterList .totalHeader').text(Store.headerContetnts.length);
 
-  if (callback) callback(headerContetnts);
+  if (callback) callback(Store.headerContetnts);
 };
 
-const searchResult = _.debounce(evaluateSearchResult, 200);
+export const searchResult = debounce(evaluateSearchResult, 200);
 
-const doesHaveP = () => location.pathname.split('/').indexOf('p') > 0;
+export const doesHaveP = () => location.pathname.split('/').indexOf('p') > 0;
 
-const innerSkeleton = (action) => {
+export const innerSkeleton = (action) => {
   const innerSkeletonHtml = `
   <div id="editorSkeletonWrapper">
     <div id="editorSkeleton">
@@ -196,7 +207,7 @@ const innerSkeleton = (action) => {
   }
 };
 
-const filterRowActivation = (el, action) => {
+export const filterRowActivation = (el, action) => {
   const active = action === 'active' ? true : false;
   $(el).attr('active', active);
   $(el).parent().parent().attr({
@@ -205,13 +216,13 @@ const filterRowActivation = (el, action) => {
   });
 };
 
-const insterFilterModal = () => {
+export const insterFilterModal = () => {
   const filterModalBox = $('#filterPopupTemplate').tmpl();
   filterModalBox.appendTo($('#editorcontainerbox'));
 };
 
 
-const getPadSlugs = () => {
+export const getPadSlugs = () => {
   const isSinglePad = clientVars.ep_singlePad.active;
   let currentPath = location.pathname.split('/');
   if (history && history.targetPath) currentPath = history.targetPath.split('/');
@@ -242,23 +253,4 @@ const getPadSlugs = () => {
   // result => [""]
   if (padSlugs[0] === '') padSlugs.shift();
   return padSlugs;
-};
-
-
-module.exports = {
-  removeFilter,
-  appendFilter,
-  adoptFilterModalPosition,
-  doesSlugExist,
-  evaluateSearchResult,
-  searchResult,
-  updateHeaderList,
-  doesHaveP,
-  innerSkeleton,
-  filterRowActivation,
-  insterFilterModal,
-  closeOpenFilterModal,
-  getPadSlugs,
-
-
 };

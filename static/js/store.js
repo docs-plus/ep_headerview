@@ -1,10 +1,7 @@
-'use strict';
-
-module.exports = {
+export const Store = {
   headerContetnts: [],
   includeSections: [],
   undoTimeList: {},
   filterList: new Map(),
   filteredHeaders: [],
-
 };

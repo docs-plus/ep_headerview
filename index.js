@@ -1,5 +1,3 @@
-'use strict';
-
 const eejs = require('ep_etherpad-lite/node/eejs/');
 const randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
 const packageJson = require('./package.json');

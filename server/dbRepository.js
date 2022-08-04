@@ -1,5 +1,3 @@
-'use strict';
-
 const db = require('ep_etherpad-lite/node/db/DB');
 
 exports.get = (key) => db.get(key).catch((error) => {

@@ -1,28 +1,23 @@
-'use strict';
+import debounce from 'lodash-es/debounce';
+import slugify from 'slugify';
+import * as Helper from './helper';
+import {Store} from './store';
 
-const _ = require('underscore');
-const slugify = require('./slugify');
-const randomString = require('ep_etherpad-lite/static/js/pad_utils').randomString;
-const Helper = require('./helper');
-let {
-  headerContetnts,
-  includeSections,
-  undoTimeList,
-  filterList,
-  filteredHeaders,
-} = require('./store');
-
-const $bodyAceOuter = () => $(document).find('iframe[name="ace_outer"]').contents();
 let socket;
 
-exports.aceEditorCSS = () => {
+export const aceEditorCSS = () => {
   const version = clientVars.headerView.version || 1;
   return [`ep_headerview/static/css/innerLayer.css?v=${version}`];
 };
 
 const clearFilterListSection = () => {
   $('.section_filterList ul li').remove();
-  $('.section_filterList ul').append('<li class="filterEmpty"><p>There is no filter <br> create the first filter</p></li>');
+  $('.section_filterList ul')
+      .append(`
+        <li class="filterEmpty">
+          <p>There is no filter <br> create the first filter</p>
+        </li>
+      `);
 };
 
 const createNewFilter = (e) => {
@@ -42,7 +37,7 @@ const createNewFilter = (e) => {
 
   const filter = {
     name: filterName,
-    id: randomString(),
+    id: Helper.randomString(),
     slug: filterUrl,
 
   };
@@ -100,7 +95,7 @@ const appendCustomStyleTag = () => {
       .append('<style id="tocCustomHeader"></style>');
 
   // padInner
-  $bodyAceOuter()
+  Helper.$bodyAceOuter()
       .find('iframe')
       .contents()
       .find('head')
@@ -109,7 +104,7 @@ const appendCustomStyleTag = () => {
 
 const eventListner = () => {
   if (!$('body').hasClass('mobileView')) {
-    $(window).resize(_.debounce(Helper.adoptFilterModalPosition, 250));
+    $(window).resize(debounce(Helper.adoptFilterModalPosition, 250));
   }
 
   $(document).on('click', '.btn_createFilter', createNewFilter);
@@ -124,7 +119,7 @@ const eventListner = () => {
       clearFilterListSection();
       clientVars.ep_headerview.filterList = list;
       list.forEach((row) => {
-        if (!filterList.has(row.id)) filterList.set(row.id, row);
+        if (!Store.filterList.has(row.id)) Store.filterList.set(row.id, row);
         if (!row) return;
         Helper.appendFilter(row);
       });
@@ -134,9 +129,10 @@ const eventListner = () => {
   });
 
   $(document)
-      .on('click', 'button#btn_filterView, button#btnOpenFilterModal, #filterModal button.btn_closeModal', () => {
-        Helper.updateHeaderList(null, includeSections);
-      });
+      .on('click',
+          'button#btn_filterView, button#btnOpenFilterModal, #filterModal button.btn_closeModal', () => {
+            Helper.updateHeaderList(null, Store.includeSections);
+          });
 
   $(document)
       .on('click', '#filterModal button.btn_closeModal', () => Helper.closeOpenFilterModal());
@@ -145,7 +141,7 @@ const eventListner = () => {
     const filterId = $(this).attr('filter-id');
     const active = $(this).attr('active');
     const highlight = $(this).attr('highlight');
-    const filter = filterList.get(filterId);
+    const filter = Store.filterList.get(filterId);
 
     const undoRow = $('#filter_remove_undo').tmpl({
       filter,
@@ -155,10 +151,12 @@ const eventListner = () => {
 
     $(`.section_filterList ul li.row_${filterId}`).html(undoRow);
 
-    undoTimeList[filterId] = setTimeout(() => {
-      delete undoTimeList[filterId];
+    Store.undoTimeList[filterId] = setTimeout(() => {
+      delete Store.undoTimeList[filterId];
       socket.emit('removeFilter', clientVars.padId, filter, (res) => {
-        console.info(`[headerview]: filter has been removed; id ${filterId}, res: ${res}, filter:`, filter);
+        console.info(`
+          [headerview]: filter has been removed; id ${filterId}, res: ${res}, filter:`, filter
+        );
         Helper.removeFilter(filter);
       });
     }, 2000);
@@ -169,28 +167,38 @@ const eventListner = () => {
     const active = $(this).attr('active');
     const highlight = $(this).attr('highlight');
 
-    clearTimeout(undoTimeList[filterId]);
-    delete undoTimeList[filterId];
+    clearTimeout(Store.undoTimeList[filterId]);
+    delete Store.undoTimeList[filterId];
 
     const rowFilter = $('#filter_listItem').tmpl({
-      filter: filterList.get(filterId),
+      filter: Store.filterList.get(filterId),
       active,
       highlight,
     });
 
     $(`.section_filterList ul li.row_${filterId}`)
-        .html(`<li class="row_${filterId}" active="${active}" highlight="${highlight}">${$(rowFilter).html()}</li>`);
+        .html(`
+          <li class="row_${filterId}" active="${active}" highlight="${highlight}">
+            ${$(rowFilter).html()}
+          </li>
+        `);
   });
 
   $(document)
       .on('keyup input', '.section_form input#filter_name', function () {
         const inputText = $(this).val();
         Helper.searchResult(inputText);
-        if (inputText.length > 0) $('#filter_url').val(slugify(inputText, {lower: true, strict: true}));
+        if (inputText.length > 0) {
+          $('#filter_url')
+              .val(slugify(inputText, {lower: true, strict: true}));
+        }
       })
       .on('focusout input', '.section_form input#filter_name', function () {
         const inputText = $(this).val();
-        if (inputText.length > 0) $('#filter_url').val(slugify(inputText, {lower: true, strict: true}));
+        if (inputText.length > 0) {
+          $('#filter_url')
+              .val(slugify(inputText, {lower: true, strict: true}));
+        }
         $('.filterNumResults').removeClass('active');
       })
       .on('focusin input', '.section_form input#filter_name', function (param) {
@@ -219,7 +227,7 @@ const eventListner = () => {
       });
 };
 
-exports.postAceInit = (hookName, context) => {
+export const postAceInit = (hookName, context) => {
   clientVars.ep_headerview = {};
   initSocket();
   appendCustomStyleTag();
@@ -261,7 +269,7 @@ exports.postAceInit = (hookName, context) => {
     const sectionsContaintSlugs = [];
 
     // If there were no filters in that list
-    // if (filterList.size === 0) return true;
+    // if (Store.filterList.size === 0) return true;
 
     let currentPath = location.pathname.split('/');
     if (locationPath) currentPath = locationPath.split('/');
@@ -287,7 +295,7 @@ exports.postAceInit = (hookName, context) => {
 
     if (filterURL.length === 0 || filterURL[0] === '') {
       // clear css filter
-      $bodyAceOuter()
+      Helper.$bodyAceOuter()
           .find('iframe')
           .contents()
           .find('head #customHeader')
@@ -302,12 +310,14 @@ exports.postAceInit = (hookName, context) => {
 
     // Give score to the slugs and reorder the filter for nested search
     filterURL.forEach((slug, index) => {
-      const filter = Array.from(filterList.values()).find((x) => x.slug === slug);
+      const filter = Array.from(Store.filterList.values()).find((x) => x.slug === slug);
       const regEx = new RegExp(filter.name, 'gi');
 
-      if (!slugsScore[slug]) slugsScore[slug] = {text: filter.name, count: 0, sumTagIndex: 0, score: 0};
+      if (!slugsScore[slug]) {
+        slugsScore[slug] = {text: filter.name, count: 0, sumTagIndex: 0, score: 0};
+      }
       // TODO: [performance-issue]: change this loop cycle
-      const sectionsSlugs = headerContetnts.filter((x) => {
+      const sectionsSlugs = Store.headerContetnts.filter((x) => {
         const is = x.text.match(regEx);
         if (is) {
           slugsScore[slug].count += 1;
@@ -344,21 +354,21 @@ exports.postAceInit = (hookName, context) => {
 
       if (bucketSearchResult.length === 0) {
         // filter all header with given first filter
-        results = headerContetnts.filter((x) => x.text.match(regEx));
-        filteredHeaders.push(...results);
+        results = Store.headerContetnts.filter((x) => x.text.match(regEx));
+        Store.filteredHeaders.push(...results);
       } else {
         const lrh1IdList = bucketSearchResult.map((x) => x.lrh1);
         const titleIdList = bucketSearchResult.map((x) => x.titleId);
 
-        let newBucketSearchResult = headerContetnts.filter((x) => titleIdList.includes(x.titleId));
+        let newBucketSearchResult = Store.headerContetnts.filter((x) => titleIdList.includes(x.titleId));
 
 
         if (!lrh1IdList.some((x) => x === undefined)) {
-          newBucketSearchResult = headerContetnts.filter((x) => lrh1IdList.includes(x.lrh1));
+          newBucketSearchResult = Store.headerContetnts.filter((x) => lrh1IdList.includes(x.lrh1));
         }
 
         results = newBucketSearchResult.filter((x) => x.text.match(regEx));
-        filteredHeaders.push(...results);
+        Store.filteredHeaders.push(...results);
 
         if (index === sortedSlugs.length - 1) {
           results = results.map((x) => ({...x, lastFilter: true}));
@@ -372,19 +382,21 @@ exports.postAceInit = (hookName, context) => {
       bucketSearchResult.push(...results);
     }
 
-    // console.info('[headerview]: filteredHeaders,', filteredHeaders, 'filterIncludesSections', filterIncludesSections);
+    // console.info('[headerview]: filteredHeaders,', Store.filteredHeaders, 'filterIncludesSections', filterIncludesSections);
 
     // ======================
     // CREATE CSS FILTER BASED "filterIncludesSections" VARIABLE
     // ======================
 
     // filter with parent // limite the search result by title header Id
-    const otherParentHeader = filteredHeaders.filter((x) => x.tag === 1).map((x) => x.titleId);
-    if (filterURL.length > 1) filteredHeaders = filteredHeaders.filter((x) => otherParentHeader.includes(x.titleId));
+    const otherParentHeader = Store.filteredHeaders.filter((x) => x.tag === 1).map((x) => x.titleId);
+    if (filterURL.length > 1) {
+      Store.filteredHeaders = Store.filteredHeaders.filter((x) => otherParentHeader.includes(x.titleId));
+    }
 
     // if just one filter name has activated
     if (filterURL.length === 1) {
-      for (const section of filteredHeaders) {
+      for (const section of Store.filteredHeaders) {
         const tagIndex = section.tag;
         const titleId = section.titleId;
 
@@ -392,10 +404,10 @@ exports.postAceInit = (hookName, context) => {
             .filter((x, lrnhIndex) => x && (lrnhIndex) <= tagIndex)
             .map((lrhSectionId) => createCssFilterForParentHeaders(tagIndex, titleId, section, lrhSectionId));
 
-        includeSections.push(...includeParts);
+        Store.includeSections.push(...includeParts);
       }
 
-      for (const section of filteredHeaders) {
+      for (const section of Store.filteredHeaders) {
         const tagIndex = section.tag;
         const titleId = section.titleId;
 
@@ -403,7 +415,7 @@ exports.postAceInit = (hookName, context) => {
             .filter((x, lrnhIndex) => x && (lrnhIndex) <= tagIndex)
             .map((lrhSectionId) => createCssFilterForChildeHeaders(tagIndex, titleId, section, lrhSectionId));
 
-        includeSections.push(...includeParts);
+        Store.includeSections.push(...includeParts);
       }
     } else {
       // If we have more than one active filter
@@ -415,12 +427,12 @@ exports.postAceInit = (hookName, context) => {
             .filter((x, lrnhIndex) => x && (lrnhIndex) <= tagIndex)
             .map((lrhSectionId) => createCssFilterForChildeHeaders(tagIndex, titleId, section, lrhSectionId));
 
-        includeSections.push(...includeParts);
+        Store.includeSections.push(...includeParts);
       }
     }
 
-    // console.log('[headerview]: includeSections', includeSections);
-    const cssSectionSelecrots = includeSections.filter((x) => x && x).join(',');
+    // console.log('[headerview]: includeSections', Store.includeSections);
+    const cssSectionSelecrots = Store.includeSections.filter((x) => x && x).join(',');
 
 
     css = `
@@ -504,7 +516,7 @@ exports.postAceInit = (hookName, context) => {
         div.ace-line:heading { color:red }
       `;
 
-    $bodyAceOuter()
+    Helper.$bodyAceOuter()
         .find('iframe')
         .contents()
         .find('head #customHeader')
@@ -514,21 +526,21 @@ exports.postAceInit = (hookName, context) => {
     epTableOfContentsPlugin(cssSectionSelecrots);
 
     Helper.innerSkeleton('hide');
-    Helper.updateHeaderList(null, includeSections);
+    Helper.updateHeaderList(null, Store.includeSections);
 
     if (callback) callback();
   };
 
   const applyFilter = (filter = {}, targetPath) => {
-    const filters = Array.from(filterList.values());
+    const filters = Array.from(Store.filterList.values());
     window.softReloadLRHAttributes();
     window.history.pushState(
         {type: 'filter', filter, filterList: filters, targetPath, target: 'filter'},
         document.title,
         targetPath
     );
-    filteredHeaders = [];
-    includeSections = [];
+    Store.filteredHeaders = [];
+    Store.includeSections = [];
     setTimeout(() => {
       Helper.updateHeaderList(() => {
         appendCssFilter(null, targetPath);
@@ -595,7 +607,7 @@ exports.postAceInit = (hookName, context) => {
   $(document).on('click', '.btn_filter_act[active="true"]', function () {
     Helper.innerSkeleton('show');
     const filterId = $(this).attr('filter-id');
-    const filter = filterList.get(filterId);
+    const filter = Store.filterList.get(filterId);
     const currentPath = location.pathname;
     const slugIndex = currentPath.split('/').indexOf(filter.slug);
     const newPath = currentPath.split('/');
@@ -612,7 +624,7 @@ exports.postAceInit = (hookName, context) => {
   $(document).on('click', '.btn_filter_act[active="false"]', function () {
     Helper.innerSkeleton('show');
     const filterId = $(this).attr('filter-id');
-    const filter = filterList.get(filterId);
+    const filter = Store.filterList.get(filterId);
     const currentPath = location.pathname.split('/');
     currentPath.push(filter.slug);
     if (currentPath[0] === '' && currentPath[1] === '') currentPath.shift();
@@ -622,7 +634,7 @@ exports.postAceInit = (hookName, context) => {
         {
           type: 'filter',
           filter,
-          filterList: Array.from(filterList.values()),
+          filterList: Array.from(Store.filterList.values()),
           targetPath,
           target: 'filter',
 
@@ -644,10 +656,10 @@ exports.postAceInit = (hookName, context) => {
 
       if (state.target && state.target === 'filter') Helper.innerSkeleton('show');
 
-      if (filterList.size === 0) {
+      if (Store.filterList.size === 0) {
         socket.emit('getFilterList', clientVars.padId, Helper.getPadSlugs(), (list) => {
           list.forEach((filter) => {
-            if (!filterList.has(filter.id)) filterList.set(filter.id, filter);
+            if (!Store.filterList.has(filter.id)) Store.filterList.set(filter.id, filter);
           });
           applyFilter(null, targetPath);
         });
@@ -664,7 +676,7 @@ exports.postAceInit = (hookName, context) => {
       Helper.updateHeaderList((headerContetnts) => {
         socket.emit('getFilterList', clientVars.padId, Helper.getPadSlugs(), (list) => {
           list.forEach((filter) => {
-            if (!filterList.has(filter.id)) filterList.set(filter.id, filter);
+            if (!Store.filterList.has(filter.id)) Store.filterList.set(filter.id, filter);
           });
 
           const slug = location.pathname.split('/').pop();
