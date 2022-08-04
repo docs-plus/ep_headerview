@@ -5,11 +5,6 @@ import {Store} from './store';
 
 let socket;
 
-export const aceEditorCSS = () => {
-  const version = clientVars.headerView.version || 1;
-  return [`ep_headerview/static/css/innerLayer.css?v=${version}`];
-};
-
 const clearFilterListSection = () => {
   $('.section_filterList ul li').remove();
   $('.section_filterList ul')
@@ -128,11 +123,11 @@ const eventListner = () => {
     });
   });
 
-  $(document)
-      .on('click',
-          'button#btn_filterView, button#btnOpenFilterModal, #filterModal button.btn_closeModal', () => {
-            Helper.updateHeaderList(null, Store.includeSections);
-          });
+  const UPDATELIST_BUTTONS = 'button#btn_filterView, button#btnOpenFilterModal, #filterModal button.btn_closeModal';
+
+  $(document).on('click', UPDATELIST_BUTTONS, () => {
+    Helper.updateHeaderList(null, Store.includeSections);
+  });
 
   $(document)
       .on('click', '#filterModal button.btn_closeModal', () => Helper.closeOpenFilterModal());
@@ -225,6 +220,11 @@ const eventListner = () => {
           $('.btn_createFilter').removeClass('active').attr('disabled', true);
         }
       });
+};
+
+export const aceEditorCSS = () => {
+  const version = clientVars.headerView.version || 1;
+  return [`ep_headerview/static/css/innerLayer.css?v=${version}`];
 };
 
 export const postAceInit = (hookName, context) => {
